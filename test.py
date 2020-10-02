@@ -61,6 +61,7 @@ def save_scores(df):
     worked.
     """
     df.to_csv('overall_scores.csv')
+
     return '-- Scores Saved -- '
 
 
@@ -79,9 +80,11 @@ def read_choices():
     (Dictionary) a dictionary of the team choices with 
     player names as keys and the team choice as the value
     """
-    with open('team_choices.txt', 'r') as file_: 
+    with open('team_choices.txt', 'r') as file_:
         choices = file_.readlines() 
+
     choices = {i.split('=')[0].strip() : i.split('=')[1].strip() for i in choices}
+    
     return choices 
 
 
@@ -100,8 +103,11 @@ def initilize_scores(choices):
     (string) a string indicating that the Scores have been initialized  
     """
     df = {k:0 for k in choices.keys()}
+
     scores = pd.DataFrame(df, index = ['Scores']).T
+
     scores.to_csv('overall_scores.csv')
+
     return '-- Scores Initialized --'
 
 
@@ -122,9 +128,12 @@ def update_overall_scores(round_number):
     """
 
     points = pd.read_csv(f'points/points_for_round_{round_number}.csv', index_col = 0)
+
     scores = pd.read_csv('overall_scores.csv', index_col = 0)
+
     for i in points.index: 
         scores['Scores'][i] += points['Points'][i]
+        
     return scores 
 
 
