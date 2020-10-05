@@ -1,6 +1,6 @@
-Tom Dent = Manchester United
-Val Samuel = Manchester City 
+Tom Dent = Fulham
+Val Samuel = Crystal Palace
 Toby Gaskell = Newcastle 
-Oli Roberts = Southamptom 
+Oli Roberts = Southampton 
 Tom Wilkinson = Liverpool
-Chris Dowling  = Burnley
+Chris Dowling  = Everton

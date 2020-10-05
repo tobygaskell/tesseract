@@ -1,4 +1,8 @@
 import pandas as pd 
+import requests
+import json 
+import utils
+
 
 class Players: 
 
@@ -133,10 +137,128 @@ def update_overall_scores(round_number):
 
     for i in points.index: 
         scores['Scores'][i] += points['Points'][i]
-        
+
     return scores 
 
 
+def pull(url):
+
+    """
+    This function will pull the data down from
+    the football API it automatically pulls the 
+    correct headers for the connection to work
+    
+    PARAMETERS: 
+
+    url(string): This is the URL for the endpoint 
+    of the API you want the data from 
+
+    RETURNS: 
+
+    (dictionary) This is the data from the API you requested 
+
+    """
+    headers = utils.get_details() 
+
+    response = requests.request("GET", url, headers=headers)
+
+    data = json.loads(response.text) 
+
+    return data 
+
+def display_data(dict):
+    print(json.dumps(dict, indent = 1))
 
 
+def print_results(raw_data):
 
+    for i in raw_data: 
+        print(i['homeTeam']['team_name'], end = ' ') 
+        print(i['goalsHomeTeam'], 'vs', i['goalsAwayTeam'], end = ' ' ) 
+        print(i['awayTeam']['team_name'])
+
+
+def find_teams_that_played(raw_data): 
+    played  = [i for i in raw_data if i['status'] == 'Match Finished']
+    not_played = []
+    for i in raw_data: 
+        if i['status'] != 'Match Finished':
+            not_played.append(i['homeTeam']['team_name'])
+            not_played.append(i['awayTeam']['team_name'])
+    return played, not_played 
+        
+
+def remove_draws(played, draws): 
+    for i in played: 
+        if i['homeTeam']['team_name'] in draws: 
+            played.remove(i)
+
+    return played
+
+
+def find_winners_and_loosers(wins_and_loss): 
+    winners = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] > i['goalsAwayTeam'] else i['awayTeam']['team_name'] for i in wins_and_loss]
+    loosers = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] < i['goalsAwayTeam'] else i['awayTeam']['team_name'] for i in wins_and_loss]
+    return winners, loosers
+
+
+def find_draws(played): 
+    draws = []
+    for i in played: 
+
+        if i['goalsHomeTeam'] == i['goalsAwayTeam']: 
+            draws.append(i['homeTeam']['team_name'])
+            draws.append(i['awayTeam']['team_name'])
+    return draws 
+
+
+def find_points(round_number, choices): 
+    points = {}
+    winners, loosers, draws, not_played = get_team_lists(round_number)
+    for name, choice in choices.items(): 
+        if choice in winners: 
+            value = winners_round_worth()
+        elif choice in loosers: 
+            value = loosers_round_worth()
+        elif choice in draws: 
+            value = draws_round_worth()
+        elif choice in not_played: 
+            value = 0 
+        else: 
+            value = 0
+
+        points[name] = value
+    return points
+
+def winners_round_worth(): 
+    return 1 
+
+def loosers_round_worth():
+    return -1 
+
+def draws_round_worth(): 
+    return 0 
+
+def get_team_lists(round_number): 
+    round = f'Regular_Season_-_{round_number}'
+    data = pull(f"https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{round}")
+    played, not_played = find_teams_that_played(data['api']['fixtures'])
+    draws = find_draws(played)
+    wins_and_loss = remove_draws(played, draws)
+    wins, loss = find_winners_and_loosers(wins_and_loss)
+    return wins, loss, draws, not_played
+
+
+def main(round__number): 
+    choices = read_choices()
+    #initilize_scores(choices)
+    points = find_points(round_number, choices)
+    points = pd.DataFrame(points, index = ['Points']).T
+    save_points(points, round_number)
+    scores = update_overall_scores(round_number)
+    save_scores(scores)
+
+
+if __name__ == "__main__": 
+    round_number = input('round? ')
+    main(round_number)
