@@ -2,29 +2,7 @@ import pandas as pd
 import requests
 import json 
 import utils
-
-
-class Players: 
-
-    def __init__(self, name, choice, points_gained, overall_score): 
-        self.name = name 
-        self.choice = choice
-        self.points_gained = points_gained
-        self.overall_score = overall_score
-
-
-class Rounds: 
-
-    def __init__(self, number, fixtures):
-        self.number = number 
-        self.fixtures = fixtures 
-
-
-class Fixtures:
-
-    def __init__(self, score, result):
-        self.score = score
-        self.result = result 
+import random 
 
 
 def save_points(df, round_number):
@@ -186,19 +164,48 @@ def find_teams_that_played(raw_data):
             not_played.append(i['homeTeam']['team_name'])
             not_played.append(i['awayTeam']['team_name'])
     return played, not_played 
-        
+
+def save_results(played, round_number): 
+    data = {'team':[],'apponent': [],'result': [],'score': []} 
+    for i in played: 
+        data['team'].append(i['homeTeam']['team_name'])
+        data['apponent'].append(i['awayTeam']['team_name'])
+        data['result'].append(get_result(i['homeTeam']['team_name'], round_number))
+        data['score'].append('{} - {}'.format(i['goalsHomeTeam'],i['goalsAwayTeam']))
+        data['team'].append(i['awayTeam']['team_name'])
+        data['apponent'].append(i['homeTeam']['team_name'])
+        data['result'].append(get_result(i['awayTeam']['team_name'], round_number))
+        data['score'].append('{} - {}'.format(i['goalsAwayTeam'],i['goalsHomeTeam']))
+    pd.DataFrame(data).to_csv(f'results/results_for_round_{round_number}.csv')
+    return '-- results saved --'
+
+
+def get_result(team_name, round_number):
+    winners, loosers, draws = get_team_lists(round_number)[:3]
+    if team_name in winners: 
+        result = 'winner'
+    elif team_name in loosers: 
+        result = 'looser'
+    elif team_name in draws: 
+        result = 'draw'
+    else: 
+        result = 'N/A'
+    return result 
 
 def remove_draws(played, draws): 
+    played_ = []
     for i in played: 
-        if i['homeTeam']['team_name'] in draws: 
-            played.remove(i)
+        if i['homeTeam']['team_name'] not in draws: 
+            played_.append(i)
 
-    return played
+    return played_
 
 
 def find_winners_and_loosers(wins_and_loss): 
-    winners = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] > i['goalsAwayTeam'] else i['awayTeam']['team_name'] for i in wins_and_loss]
-    loosers = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] < i['goalsAwayTeam'] else i['awayTeam']['team_name'] for i in wins_and_loss]
+    winners = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] > i['goalsAwayTeam'] 
+                                          else i['awayTeam']['team_name'] for i in wins_and_loss]
+    loosers = [i['homeTeam']['team_name'] if i['goalsHomeTeam'] < i['goalsAwayTeam'] 
+                                          else i['awayTeam']['team_name'] for i in wins_and_loss]
     return winners, loosers
 
 
@@ -214,10 +221,10 @@ def find_draws(played):
 
 def find_points(round_number, choices): 
     points = {}
-    winners, loosers, draws, not_played = get_team_lists(round_number)
+    winners, loosers, draws, not_played = get_team_lists(round_number)[:4]
     for name, choice in choices.items(): 
         if choice in winners: 
-            value = winners_round_worth()
+            value = winners_round_worth(choice, choices, round_number) 
         elif choice in loosers: 
             value = loosers_round_worth()
         elif choice in draws: 
@@ -230,8 +237,51 @@ def find_points(round_number, choices):
         points[name] = value
     return points
 
-def winners_round_worth(): 
-    return 1 
+def DP_round(): 
+    return random.randrange(10) > 8  
+
+def winners_round_worth(choice, choices, round_number ): 
+    double_points = DP_round()
+    derby = played_in_a_derby(choice, choices) 
+    head_to_head = played_head_to_head(choice, choices, round_number) 
+    if double_points == True: 
+        value = 2 
+    if head_to_head == True: 
+        value = 2
+    if derby == True: 
+        value = 2
+    return value  
+
+
+def played_in_a_derby(choice, round_number): 
+    """
+    """
+    derby = False
+    results = pd.read_csv(f'results/results_for_round_{round_number}.csv')
+    derbys = [('Manchester United', 'Manchester City'), ('Liverpool' , 'Everton'),
+              ('Arsenal' , 'Tottenham'), ('Chelsea', 'Fulham'),
+              ('Manchester City' , 'Liverpool'), ('Leeds ', 'Manchester United'),
+              ('Sheffield' , 'Leeds Utd'), ('Man Utd ', 'Liverpool'), 
+              ('West Brom' , 'Aston Villa'), ('Wolves' , 'West Brom'), 
+              ('Wolves' , 'Aston Villa')]
+    for i in derbys: 
+        if choice == i[0] and i[1] == results[results['team'] == choice]['apponent'].values[0]: 
+            derby =  True 
+        elif choice == i[1] and i[0] == results[results['team'] == choice]['apponent'].values[0]:  
+            derby =  True 
+    return derby 
+
+
+
+def played_head_to_head(choice, choices, round_number):
+    """
+    """
+    results = pd.read_csv(f'results/results_for_round_{round_number}.csv')
+    if results[results['team'] == choice]['apponent'].values[0] in choices.values(): 
+        head_to_head = True
+    else: 
+        head_to_head = False
+    return head_to_head
 
 def loosers_round_worth():
     return -1 
@@ -246,10 +296,10 @@ def get_team_lists(round_number):
     draws = find_draws(played)
     wins_and_loss = remove_draws(played, draws)
     wins, loss = find_winners_and_loosers(wins_and_loss)
-    return wins, loss, draws, not_played
+    return wins, loss, draws, not_played, played 
 
 
-def main(round__number): 
+def main(round_number): 
     choices = read_choices()
     #initilize_scores(choices)
     points = find_points(round_number, choices)
@@ -259,6 +309,14 @@ def main(round__number):
     save_scores(scores)
 
 
-if __name__ == "__main__": 
+
+if __name__ == '__main__': 
     round_number = input('round? ')
-    main(round_number)
+    choices = read_choices() 
+    for i in choices.values(): 
+        print(played_in_a_derby(i, round_number))
+
+
+'''if __name__ == "__main__": 
+    round_number = input('round? ')
+    main(round_number)'''

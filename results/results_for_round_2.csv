@@ -1,0 +1,21 @@
+,team,apponent,result,score
+0,Everton,West Brom,winner,5 - 2
+1,West Brom,Everton,looser,2 - 5
+2,Leeds,Fulham,winner,4 - 3
+3,Fulham,Leeds,looser,3 - 4
+4,Manchester United,Crystal Palace,looser,1 - 3
+5,Crystal Palace,Manchester United,winner,3 - 1
+6,Arsenal,West Ham,winner,2 - 1
+7,West Ham,Arsenal,looser,1 - 2
+8,Southampton,Tottenham,looser,2 - 5
+9,Tottenham,Southampton,winner,5 - 2
+10,Newcastle,Brighton,looser,0 - 3
+11,Brighton,Newcastle,winner,3 - 0
+12,Chelsea,Liverpool,looser,0 - 2
+13,Liverpool,Chelsea,winner,2 - 0
+14,Leicester,Burnley,winner,4 - 2
+15,Burnley,Leicester,looser,2 - 4
+16,Aston Villa,Sheffield Utd,winner,1 - 0
+17,Sheffield Utd,Aston Villa,looser,0 - 1
+18,Wolves,Manchester City,looser,1 - 3
+19,Manchester City,Wolves,winner,3 - 1

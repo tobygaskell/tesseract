@@ -2,4 +2,5 @@ venv/
 __pycache__
 config.ini
 points/ 
-overall_scores.csv 
+overall_scores.csv
+*.ipynb
