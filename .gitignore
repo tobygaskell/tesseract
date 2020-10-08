@@ -4,3 +4,4 @@ config.ini
 points/ 
 overall_scores.csv
 *.ipynb
+results/
