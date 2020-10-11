@@ -1,4 +1,5 @@
 import string, configparser 
+from sqlalchemy import create_engine 
 
 def clean_string(text):
     """
@@ -20,7 +21,7 @@ def clean_string(text):
 
     return text.lower().title().strip() 
 
-def get_details(): 
+def get_api_details(): 
     """
     This function reads the correct headers from the config.ini 
     file and returns them so we can use them to access the api 
@@ -33,7 +34,6 @@ def get_details():
 
     (dictionary) This is a dictionary with the correct details 
     to connect to the api 
-
     """
     config = configparser.ConfigParser()
 
@@ -46,3 +46,47 @@ def get_details():
     headers['x-rapidapi-key'] = config['football_API']['key']
     
     return headers 
+
+def get_facebook_details():
+    """
+    This Function reads the correct details to log into facebook 
+    which will allow python to send messages on your behalf. 
+
+    PARAMETERS: 
+
+    None 
+
+    RETURNS: 
+
+    username(string): the username for the facebook account 
+    password(string): the password for the facebook account
+    """
+    config = configparser.ConfigParser()
+
+    config.read('config.ini') 
+
+    username = config['facebook']['username']
+
+    password = config['facebook']['password']
+
+    return username, password
+
+
+def get_sql_details(): 
+
+    config = configparser.ConfigParser()
+
+    config.read('config.ini')
+
+    username = config['mysql']['username']
+
+    password = config['mysql']['password']
+
+    port = config['mysql']['port']
+
+    database = config['mysql']['database']
+
+    conn_string  = f'mysql+mysqlconnector://{username}: \
+                    {password}@localhost:{port}/{database}'
+
+    return create_engine(conn_string)

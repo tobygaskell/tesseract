@@ -4,6 +4,8 @@ import json
 import utils
 import random 
 
+conn = utils.get_sql_details()
+
 
 def save_points(df, round_number):
     """
@@ -24,6 +26,7 @@ def save_points(df, round_number):
     worked.
     """
     df.to_csv(f'points/points_for_round_{round_number}.csv')
+
     return '-- Points Saved --'
 
 
@@ -136,7 +139,7 @@ def pull(url):
     (dictionary) This is the data from the API you requested 
 
     """
-    headers = utils.get_details() 
+    headers = utils.get_api_details() 
 
     response = requests.request("GET", url, headers=headers)
 
@@ -169,6 +172,7 @@ def find_teams_that_played(raw_data):
             not_played.append(i['homeTeam']['team_name'])
             not_played.append(i['awayTeam']['team_name'])
     return played, not_played 
+
 
 def save_results(played, round_number): 
     """
@@ -326,6 +330,32 @@ def played_head_to_head(choice, choices, round_number):
     return head_to_head
 
 
+def initilize_choice_tracker(choices): 
+    """
+    """
+    teams = get_all_teams()
+    dic = {k:[0 for i in range(len(teams))] for k in choices.keys()}
+    pd.DataFrame(dic, index = teams).to_csv('choice_tracker.csv')
+    return '-- choice tracker initialized --'
+
+
+def get_all_teams(): 
+    """
+    """
+    data = pull('https://api-football-v1.p.rapidapi.com/v2/teams/league/2790') 
+    teams = [i['name'] for i in data['api']['teams']]
+    return teams 
+
+def update_choice_tracker(choices):
+    tracker = pd.read_csv('choice_tracker.csv', index_col = 0)
+    for k,v in choices.items():
+        tracker[k][v] += 1
+    tracker.to_csv('choice_tracker.csv')
+    return '-- Updated choice tracker --'
+
+#def stop_too_many_picks()
+
+
 def get_team_lists(round_number): 
     """
     """
@@ -344,6 +374,8 @@ def main(round_number):
     choices = read_choices()
     if round_number == '1': 
         initilize_scores(choices)
+        initilize_choice_tracker(choices)
+    update_choice_tracker(choices)
     points, double_weekend, draw_weekend = find_points(round_number, choices)
     points = pd.DataFrame(points, index = ['Points']).T
     save_points(points, round_number)
@@ -354,5 +386,5 @@ def main(round_number):
 
 
 if __name__ == "__main__": 
-    round_number = input('round? ')
+    round_number = input('round? ') 
     main(round_number)
