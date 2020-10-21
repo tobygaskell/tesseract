@@ -1,5 +1,7 @@
-import string, configparser 
+import string, configparser, json, requests
 from sqlalchemy import create_engine 
+import mysql.connector as con 
+
 
 def clean_string(text):
     """
@@ -73,6 +75,8 @@ def get_facebook_details():
 
 
 def get_sql_details(): 
+    """
+    """
 
     config = configparser.ConfigParser()
 
@@ -85,8 +89,63 @@ def get_sql_details():
     port = config['mysql']['port']
 
     database = config['mysql']['database']
+    host = config['mysql']['host']
 
-    conn_string  = f'mysql+mysqlconnector://{username}: \
-                    {password}@localhost:{port}/{database}'
+    conn_string  = f'mysql+mysqlconnector://{username}:\
+{password}@{host}:{port}/{database}'
 
+    print(conn_string)
     return create_engine(conn_string)
+
+def input_sql(query): 
+    """
+    """
+    connection = con.connect(host = 'localhost', database = 'FPG',
+                             user = 'root', password = '2002Fish')
+    cursor = connection.cursor()  
+
+    cursor.execute(query) 
+
+    connection.commit() 
+
+    cursor.close()
+
+    return '--query inputted--'
+
+
+def get_current_round(): 
+    """
+    """
+    url = "https://api-football-v1.p.rapidapi.com/v2/fixtures/rounds/2790/current"
+
+    data = pull(url)
+
+    round = data['api']['fixtures'][0][-1]
+
+    return round 
+
+
+def pull(url):
+
+    """
+    This function will pull the data down from
+    the football API it automatically pulls the 
+    correct headers for the connection to work
+    
+    PARAMETERS: 
+
+    url(string): This is the URL for the endpoint 
+    of the API you want the data from 
+
+    RETURNS: 
+
+    (dictionary) This is the data from the API you requested 
+
+    """
+    headers = get_api_details() 
+
+    response = requests.request("GET", url, headers=headers)
+
+    data = json.loads(response.text) 
+
+    return data 
