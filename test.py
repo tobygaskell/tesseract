@@ -1,11 +1,10 @@
 import pandas as pd 
-import requests
-import json 
 import utils
 import random 
 
 conn = utils.get_sql_details()
 
+# TODO: refactor the code so that it reads and saves the data to SQL 
 
 def save_points(df, round_number):
     """
@@ -120,46 +119,6 @@ def update_overall_scores(round_number):
         scores['Scores'][i] += points['Points'][i]
 
     return scores 
-
-
-def pull(url):
-
-    """
-    This function will pull the data down from
-    the football API it automatically pulls the 
-    correct headers for the connection to work
-    
-    PARAMETERS: 
-
-    url(string): This is the URL for the endpoint 
-    of the API you want the data from 
-
-    RETURNS: 
-
-    (dictionary) This is the data from the API you requested 
-
-    """
-    headers = utils.get_api_details() 
-
-    response = requests.request("GET", url, headers=headers)
-
-    data = json.loads(response.text) 
-
-    return data 
-
-def display_data(dict):
-    """
-    """
-    print(json.dumps(dict, indent = 1))
-
-
-def print_results(raw_data):
-    """
-    """
-    for i in raw_data: 
-        print(i['homeTeam']['team_name'], end = ' ') 
-        print(i['goalsHomeTeam'], 'vs', i['goalsAwayTeam'], end = ' ' ) 
-        print(i['awayTeam']['team_name'])
 
 
 def find_teams_that_played(raw_data): 
@@ -342,7 +301,7 @@ def initilize_choice_tracker(choices):
 def get_all_teams(): 
     """
     """
-    data = pull('https://api-football-v1.p.rapidapi.com/v2/teams/league/2790') 
+    data = utils.pull('https://api-football-v1.p.rapidapi.com/v2/teams/league/2790') 
     teams = [i['name'] for i in data['api']['teams']]
     return teams 
 
@@ -353,14 +312,14 @@ def update_choice_tracker(choices):
     tracker.to_csv('choice_tracker.csv')
     return '-- Updated choice tracker --'
 
-#def stop_too_many_picks()
+#TODO: build function to stop players picking a team they have picked twice 
 
 
 def get_team_lists(round_number): 
     """
     """
     round = f'Regular_Season_-_{round_number}'
-    data = pull(f"https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{round}")
+    data = utils.pull(f"https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{round}")
     played, not_played = find_teams_that_played(data['api']['fixtures'])
     draws = find_draws(played)
     wins_and_loss = remove_draws(played, draws)

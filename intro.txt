@@ -1,0 +1,83 @@
+Hi guys, welcome to the first Beta test of FPG (Football Prediction Game).
+
+The name is a working progress!! please reach out to me if you have any good ideas 
+
+This is a game i have been building for a few weeks now. If you are aware
+of the rules great! If not, feel free to type "rules" into this group chat. 
+
+Along side coding the FPG logic, i have also built a facebook chat bot which will be 
+used to run the game and provide us with the relevent updates. This will allow me to 
+play the game as if i was any other player. As the game will be automatically monitored 
+by the chat bot. (I also did it just because its pretty cool haha)
+
+So lets get into how this is going to work... (excuse me if i get a tad technical here)
+
+From this moment on the game is LIVE! Which means that this group chat will be monitored 
+24/7 by the chat bot (hopefully!) The game and chat bot are running on a server (my 
+raspbery pi) in my flat in london. So this does mean that if my flat was to get a power 
+cut or in the more likey event i forget to pay my electricity bill the server will be 
+down! This obviously isnt ideal. The reason I chose to do this as apose to using a cloud
+computing provider was because to justify spending a considerable about of time doing 
+this i told myself i was learning infrastructure and in that i wanted to have my own 
+physical server. rightly or wrongly this is what i chose to do. so in the event that 
+2020 throws another curve ball our way and zombies invade my flat and my server gets 
+unplugged then, i will work as quickly as possible to get it back up and running. This 
+however sometimes may not be possible right away. in the case it is down for a prolonged 
+period of time. Myself or Val will update the scores manually. Please do bare with me on
+this as it is still in testing stages. 
+
+Another Much more likely caveate is if my code was to break. This however isn't as 
+annoying as the server going down as it would highlight a bug in the game which i 
+will be able to fix. And lets remember finding bugs is the main focus of a beta test.
+Again if that happens and the game is down for a prolonged period of time the
+management team will update the scores manually and attempt to keep the continuety of 
+the game going. 
+
+The game and chat bot is built in python, because python is the GOAT. Some of you may 
+be asking but surely there is a much better language to build such a game in. To you i 
+say FU PYTHON FTW! But no yes there probably is but as i have mentioned this project was a 
+oportunity to teach myself infrastructure not a new coding language. Hense why i have 
+stuck with Python. Anyone who wants to look into the code is more than welcome to do 
+so and will find it here ... 
+
+At the start of a new round in the premire league our chat bot will automatically message 
+the group chat with: 
+
+a) An update of the scores from the previous round 
+b) An update of the overall standings of the players 
+c) The fixtures for the next round 
+d) Whether or not the upcoming round is:    
+        a) A Double Point Weekend or 
+        b) A Draw Weekend 
+
+To input your team choice for that week all you have to do is, send a message to this 
+group chat with the following format: 
+
+    "Team = <your_team_choice>"
+
+The chat bot will then read your choice, detect who has sent the message and input your 
+name, choice and which round of the premier league it is into a SQL database. After it 
+has successfully inputted your choice it will send you back a message confirming that 
+your choice has been succesfully inputted. 
+
+Then once the games for that week have been played FPG will automattically read the 
+football scores from an API and update all our scores accordingly. No input from me
+should be required unless something goes wrong!. (lets see how long that lasts). 
+
+Then at the end of the premier league we should have a winner! But more importantly 
+we should have a bug free game which we can role out properly next season!
+
+If anyone has any questions feel free to ask! but i would like to point you to the help 
+function of the chatbot. If you type 'help' into the chat you will get back a message 
+outlining all the uses of the chatbot. 
+
+So that is it. All the late night coding sessions and the endless typing has finnally 
+reached the testing stage! I hope you all enjoy playing and as i say please do bare 
+with me if anything goes wrong!! 
+
+Happy predicting! 
+
+
+
+
+

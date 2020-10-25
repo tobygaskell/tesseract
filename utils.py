@@ -23,6 +23,7 @@ def clean_string(text):
 
     return text.lower().title().strip() 
 
+
 def get_api_details(): 
     """
     This function reads the correct headers from the config.ini 
@@ -48,6 +49,7 @@ def get_api_details():
     headers['x-rapidapi-key'] = config['football_API']['key']
     
     return headers 
+
 
 def get_facebook_details():
     """
@@ -75,9 +77,24 @@ def get_facebook_details():
 
 
 def get_sql_details(): 
-    """
-    """
 
+    # TODO: change it so this function takes in a sql query and 
+    #       returns a DataFrame of the result
+
+    """
+    This function will read the SQL connection details for 
+    the SQL server being used to store the game data on and 
+    allow you to read from the SQL database 
+
+    PARAMETERS: 
+
+    NONE
+
+    RETURNS: 
+
+    (ConnectionEngine) This is the connection engine for the 
+    SQL database names conn 
+    """
     config = configparser.ConfigParser()
 
     config.read('config.ini')
@@ -89,16 +106,26 @@ def get_sql_details():
     port = config['mysql']['port']
 
     database = config['mysql']['database']
+
     host = config['mysql']['host']
 
-    conn_string  = f'mysql+mysqlconnector://{username}:\
-{password}@{host}:{port}/{database}'
+    conn_string  = f'mysql+mysqlconnector://{username}:{password}@{host}:{port}/{database}'
 
-    print(conn_string)
     return create_engine(conn_string)
+
 
 def input_sql(query): 
     """
+    This function will let you input data into the SQL database
+    used for this game. 
+
+    PARAMETERS: 
+
+    query (string): This is the SQL query you wish to use to input the
+                    data into the data lake. 
+
+    RETURNS: 
+    (string) indicating that the query was successfully carried out.
     """
     connection = con.connect(host = 'localhost', database = 'FPG',
                              user = 'root', password = '2002Fish')
@@ -115,6 +142,16 @@ def input_sql(query):
 
 def get_current_round(): 
     """
+    This function will read the current round for the 
+    premier league this will be determined by the API. 
+
+    PARAMETERS: 
+
+    NONE 
+
+    RETURNS: 
+
+    (int) the current number for the permier league  
     """
     url = "https://api-football-v1.p.rapidapi.com/v2/fixtures/rounds/2790/current"
 

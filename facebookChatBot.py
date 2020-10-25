@@ -222,7 +222,6 @@ def fixture_request_text(name):
 def help_request_text(name): 
     '''
     '''
-
     with open('help.txt','r') as file: 
         help_string = file.read()
     print(help_string)
