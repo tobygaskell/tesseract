@@ -1,6 +1,7 @@
 import string, configparser, json, requests
 from sqlalchemy import create_engine 
 import mysql.connector as con 
+import pandas as pd 
 
 
 def clean_string(text):
@@ -78,8 +79,7 @@ def get_facebook_details():
 
 def get_sql_details(): 
 
-    # TODO: change it so this function takes in a sql query and 
-    #       returns a DataFrame of the result
+    # TODO: change the doc stings so they match the new functionality 
 
     """
     This function will read the SQL connection details for 
@@ -109,9 +109,39 @@ def get_sql_details():
 
     host = config['mysql']['host']
 
-    conn_string  = f'mysql+mysqlconnector://{username}:{password}@{host}:{port}/{database}'
+    return username, password, host, port, database 
 
-    return create_engine(conn_string)
+
+def read_from_sql(query, index = False) : 
+    """
+    """
+    username, password, host, port, database = get_sql_details() 
+
+    conn_string  = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(username, password, host, port, database)
+
+    conn = create_engine(conn_string)
+    if index: 
+        df = pd.read_sql(query, conn, index_col = index)
+
+    else: 
+        df = pd.read_sql(query, conn) 
+
+    return df 
+
+
+def input_into_sql(df, table, how):
+    '''
+    '''
+    username, password, host, port, database = get_sql_details() 
+
+    conn_string  = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(username, password, host, port, database)
+
+    conn = create_engine(conn_string)
+
+    df.to_sql(table, conn, index = False,  if_exists = how)
+
+    return '--table updated--'
+
 
 
 def input_sql(query): 
@@ -127,8 +157,12 @@ def input_sql(query):
     RETURNS: 
     (string) indicating that the query was successfully carried out.
     """
-    connection = con.connect(host = 'localhost', database = 'FPG',
-                             user = 'root', password = '2002Fish')
+    username, password, host, port, database = get_sql_details() 
+
+
+    connection = con.connect(host = host, database = database,
+                             user = username, password = password)
+
     cursor = connection.cursor()  
 
     cursor.execute(query) 

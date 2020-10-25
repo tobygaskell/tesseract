@@ -15,20 +15,24 @@ class CustomClient(Client):
     def onMessage(self, message_object, author_id, thread_id, thread_type, **kwargs):
         '''
         '''
-        print('in onMessage')
+
         relevent = check_message(thread_id)
+
         if relevent ==  True: 
+
             do_stuff(message_object, author_id, thread_id, thread_type) 
-        else: 
-            pass
+
 
 def check_message(thread_id): 
     '''
     '''
     if thread_id == '3365583033489198': 
+
         relevent_message = True
+
     else: 
         relevent_message = False 
+
     return relevent_message
 
 def do_stuff(msg_obj, author_id, thread_id, thread_type):
@@ -40,18 +44,39 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
 
     if message_type == 'Team Submission': 
 
-        input_team(name, msg_obj.text)
+        valid_submission = check_validity(name, msg_obj.text)
 
-    text = find_text(msg_obj.text, name, message_type, thread_id, thread_type)
+        if valid_submission:
+
+            input_team(name, msg_obj.text)
+
+    text = find_text(msg_obj.text, name, message_type, valid_submission) 
 
     if text != None: 
 
         send_message(text, thread_id, thread_type, client)
 
+
+def check_validity(name, message): 
+    '''
+    '''
+    team = utils.clean_string(message.split('=')[1])
+
+    query = "SELECT COUNT(*) AS count FROM choices WHERE name = '{}' and choice = '{}'".format(name, team)
+
+    df = utils.read_from_sql(query)
+
+    times_chosen = df['count'][0]  
+
+    if times_chosen >= 2: 
+
+        validity = False 
+        
     else: 
 
-        pass 
+        validity = True
 
+    return validity 
 
 def input_team(name, message): 
     '''
@@ -60,7 +85,7 @@ def input_team(name, message):
 
     team = utils.clean_string(message.split('=')[1])
 
-    query = "insert into choices (player, choice, round) values ('{}', '{}', '{}');".format(name, team, round)
+    query = "INSERT INTO choices (name, choice, round) VALUES ('{}', '{}', '{}');".format(name, team, round)
 
     return utils.input_sql(query)
 
@@ -104,14 +129,17 @@ def evaluate_message(text):
 
     return message_type
 
-def find_text(text, name, message_type, thread_id, thread_type): 
+def find_text(text, name, message_type, valid_submission): 
     '''
     '''
     if message_type == "Help Request": 
         text = help_request_text(name)
         
-    elif message_type == 'Team Submission': 
+    elif message_type == 'Team Submission' and valid_submission == True: 
         text = team_submission_text(name, text)
+
+    elif message_type == 'Team Submission' and valid_submission == False: 
+        text = non_valid_submission_text(name, text)
 
     elif message_type == 'Standing Request': 
         text = standing_request_text(name)
@@ -136,12 +164,17 @@ def find_text(text, name, message_type, thread_id, thread_type):
 
     return text 
 
+def non_valid_submission_text(name, text): 
+    '''
+    '''
+    return "Hi {}, you have chosen {} too many times. Please make a new submission".format(name, utils.clean_string(text.split('=')[1]))
+
 def team_submission_text(name, text): 
     '''
     '''
     return '''Hi {}, you have submitted {} as your team for this week!
 
-If this is incorrect please redo your submission before the cutoff'''.format(name, text.split('=')[1])
+If this is incorrect please redo your submission'''.format(name, utils.clean_string(text.split('=')[1]))
 
 
 def standing_request_text(name): 
@@ -174,6 +207,8 @@ def position_request_text(name):
     return 'Hi {}, you are currently {} in the standings'.format(name, pos)
 
 def choice_request_text(name): 
+    '''
+    '''
     return 'Hi {name}, Sorry this Function is currently not working!!'.format(name)
 
 
@@ -181,7 +216,9 @@ def winning_request_text(name):
     '''
     '''
     standings_list = find_standings()[1]
+
     winning = standings_list[0]
+
     return 'Hi {}, {} is currently top of the standings.'.format(name, winning)
 
 
@@ -189,7 +226,9 @@ def loosing_request_text(name):
     '''
     '''
     standings_list = find_standings()[1]
+
     loosing = standings_list[len(standings_list)-1]
+
     return 'Hi {}, {} is currently bottom of the standings.'.format(name, loosing)
 
 
@@ -208,23 +247,31 @@ def find_standings():
 
 
 def fixture_request_text(name):
-    """
-    """
+    '''
+    '''
     round_number = utils.get_current_round()
+
     round = 'Regular_Season_-_{}'.format(round_number)
+
     text = 'Hi {}, the fixtures for Round {} are: \n\n'.format(name, round_number)
+
     data = utils.pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{}".format(round))
+
     raw_data = data['api']['fixtures']
+
     for i in raw_data: 
+
         text += '{} vs {}\n'.format(i['homeTeam']['team_name'],i['awayTeam']['team_name']) 
+
     return text
 
 def help_request_text(name): 
     '''
     '''
     with open('help.txt','r') as file: 
+
         help_string = file.read()
-    print(help_string)
+
     return "Hi, {}".format(name) + help_string 
 
 
@@ -232,10 +279,12 @@ def send_message(text, thread_id, thread_type, client):
     '''
     '''
     client.sendMessage(text, thread_id, thread_type)
+
     return '--Message Sent--'
 
 
-
 if __name__ == "__main__": 
-    client = CustomClient('toby96@sky.com', '2002Fish')
+
+    client = CustomClient('toby96@sky.com', '2002Fish1')
+
     client.listen()

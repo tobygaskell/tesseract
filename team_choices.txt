@@ -1,6 +1,0 @@
-Toby Gaskell = Liverpool  
-Val Samuel = Everton 
-Oli Roberts = Manchester City 
-Tom Dent = Southampton 
-Tom Wilkinson = Manchester United
-Chris Dowlin = Chelsea 
