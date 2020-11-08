@@ -407,9 +407,9 @@ def update_choice_tracker(choices):
 def get_team_lists(round_number): 
     """
     """
-    round = f'Regular_Season_-_{round_number}'
+    round = 'Regular_Season_-_{}'.format(round_number)
 
-    data = utils.pull(f"https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{round}")
+    data = utils.pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{}".format(round))
 
     played, not_played = find_teams_that_played(data['api']['fixtures'])
 
@@ -462,5 +462,8 @@ def main():
 
 
 if __name__ == "__main__": 
-   main()  
-
+    main()  
+    with open('weekly_message.txt') as file: 
+         WM = file.read() 
+    print(WM)
+    
