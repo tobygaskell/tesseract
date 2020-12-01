@@ -6,3 +6,4 @@ overall_scores.csv
 *.ipynb
 results/
 out.txt
+.DS_Store 
