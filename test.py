@@ -418,4 +418,12 @@ def main():
 
 
 if __name__ == "__main__": 
+<<<<<<< HEAD
    main()  
+=======
+    main()  
+    with open('weekly_message.txt') as file: 
+         WM = file.read() 
+    print(WM)
+    
+>>>>>>> 8b933910ee71a690622b0c2dcad28c7ce9372be8

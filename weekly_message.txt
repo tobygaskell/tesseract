@@ -1,0 +1,28 @@
+Hey Guys, 
+
+Another round of FPG has concluded. We are now in round 
+{current_round} of the premier league. 
+
+Here are the scores from round {previous_round}:
+
+{scores}
+
+And here are the updated standings after round {previous_round}:
+
+{standings}
+
+Looking forward, the fixtures for round {current_round} are: 
+{fixtures}
+
+Get your team choices in ASAP to make sure you don't miss the 
+deadline. 
+
+{added_info}
+
+To submit a team just send a message in this chat with the 
+format:
+        "team = <your_team_choice>"
+
+Yours sincerly 
+
+Toby's Chat Bot. 
