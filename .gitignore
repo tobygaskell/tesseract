@@ -5,3 +5,4 @@ points/
 overall_scores.csv
 *.ipynb
 results/
+out.txt

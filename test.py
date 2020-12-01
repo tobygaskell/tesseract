@@ -2,50 +2,6 @@ import pandas as pd
 import utils
 import random 
 
-
-# def save_points(df, round_number):
-#     """
-#     This function is used to save the csv containing
-#     the points per round for each player. 
-
-#     PARAMETERS: 
-
-#     df (DataFrame): This is the DataFrame of points 
-#     you want to save
-
-#     round_number (int): This is the round number for 
-#     the given round you want to save the points for
-
-#     RETURNS: 
-
-#     (string): a string indicating that the save has 
-#     worked.
-#     """
-#     df.to_sql('points', conn,  if_exists = 'append')
-
-#     return '-- Points Saved --'
-
-
-# def save_scores(df):
-#     """
-#     This function is used to save the csv containing
-#     the overall scores for each player. 
-
-#     PARAMETERS: 
-
-#     df (DataFrame): this is the DataFrame of scores 
-#     you want to save
-
-#     RETURNS: 
-
-#     (string): a string indicating that the save has 
-#     worked.
-#     """
-#     df.to_sql('scores', conn, if_exists = 'replace')
-
-#     return '-- Scores Saved -- '
-
-
 def read_choices(round_number):
     """
     This Function will read the choices of teams for
@@ -70,6 +26,7 @@ def read_choices(round_number):
     choices = {k:v['choice'] for k,v in choices.items()}
 
     return choices 
+    
 
 def read_points(round_number): 
     '''
@@ -79,7 +36,6 @@ def read_points(round_number):
     points = utils.read_from_sql(query, 'name')
 
     return points 
-
 
 
 def read_scores(round_number): 
@@ -289,7 +245,6 @@ def draw_weekend(round_number):
     return random.randrange(100) > 80
 
 
-
 def round_worth(value, choice, choices, round_number, double_points): 
     """
     """
@@ -407,9 +362,9 @@ def update_choice_tracker(choices):
 def get_team_lists(round_number): 
     """
     """
-    round = f'Regular_Season_-_{round_number}'
+    round = 'Regular_Season_-_{}'.format(round_number)
 
-    data = utils.pull(f"https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{round}")
+    data = utils.pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{}".format(round))
 
     played, not_played = find_teams_that_played(data['api']['fixtures'])
 
@@ -420,6 +375,7 @@ def get_team_lists(round_number):
     wins, loss = find_winners_and_loosers(wins_and_loss)
 
     return wins, loss, draws, not_played, played 
+
 
 def initialize_scores(choices):
     '''
@@ -463,4 +419,3 @@ def main():
 
 if __name__ == "__main__": 
    main()  
-

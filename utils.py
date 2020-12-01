@@ -111,15 +111,23 @@ def get_sql_details():
 
     return username, password, host, port, database 
 
-
-def read_from_sql(query, index = False) : 
-    """
-    """
+def create_sql_connection():
+    '''
+    '''
     username, password, host, port, database = get_sql_details() 
 
     conn_string  = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(username, password, host, port, database)
 
     conn = create_engine(conn_string)
+
+    return conn
+
+
+def read_from_sql(query, index = False) : 
+    '''
+    '''
+    conn = create_sql_connection()
+
     if index: 
         df = pd.read_sql(query, conn, index_col = index)
 
@@ -132,11 +140,7 @@ def read_from_sql(query, index = False) :
 def input_into_sql(df, table, how):
     '''
     '''
-    username, password, host, port, database = get_sql_details() 
-
-    conn_string  = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(username, password, host, port, database)
-
-    conn = create_engine(conn_string)
+    conn = create_sql_connection()
 
     df.to_sql(table, conn, index = False,  if_exists = how)
 
@@ -191,7 +195,8 @@ def get_current_round():
 
     data = pull(url)
 
-    round = data['api']['fixtures'][0][-1]
+    round = data['api']['fixtures'][0]
+    print(round)
 
     return round 
 

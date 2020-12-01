@@ -67,4 +67,3 @@ To make it more fun we reccomend 6 players putting in £10 each. This allows you
 3) Third  gets £5  
 
 ## Happy Playing Everyone! 
-

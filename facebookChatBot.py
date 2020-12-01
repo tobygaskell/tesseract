@@ -6,6 +6,8 @@ import utils
 def login_to_facebook(username, password): 
     '''
     '''
+    print(username)
+    print(password)
     client = CustomClient(username, password)
     return client 
 
@@ -192,16 +194,22 @@ def position_request_text(name):
     '''
     standings_list = find_standings()[1]
     for i in standings_list: 
+
         if name == i: 
+            
             pos = standings_list.index(i) + 1
 
     if pos == 1: 
         pos = '1st'
+
     elif pos == 2: 
         pos = '2nd'
+
     elif pos == 3:
         pos = '3rd'
+
     elif pos in [4,5,6]:
+
         pos = str(pos) + 'th'
 
     return 'Hi {}, you are currently {} in the standings'.format(name, pos)
@@ -285,6 +293,6 @@ def send_message(text, thread_id, thread_type, client):
 
 if __name__ == "__main__": 
 
-    client = CustomClient('toby96@sky.com', '2002Fish1')
+    client = CustomClient('toby96@sky.com', '2002Fish2')
 
     client.listen()
