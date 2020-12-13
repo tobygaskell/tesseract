@@ -1,23 +1,25 @@
 Hey Guys, 
 
 Another round of FPG has concluded. We are now in round 
-{current_round} of the premier league. 
+{} of the premier league. 
 
-Here are the scores from round {previous_round}:
+Here are the scores from round {}:
 
-{scores}
+{}
 
-And here are the updated standings after round {previous_round}:
+And here are the updated standings after round {}:
 
-{standings}
+{}
 
-Looking forward, the fixtures for round {current_round} are: 
-{fixtures}
+Looking forward, the fixtures for round {} are: 
+{}
 
 Get your team choices in ASAP to make sure you don't miss the 
 deadline. 
 
-{added_info}
+Here is the added info needed for round {}:
+
+{}
 
 To submit a team just send a message in this chat with the 
 format:

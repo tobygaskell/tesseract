@@ -1,22 +1,24 @@
 import pandas as pd 
 import utils
 import random 
+import facebookChatBot as fbcb 
 
 def read_choices(round_number):
-    """
+    '''
     This Function will read the choices of teams for
-    each player. The choices will be in a text file 
-    called team_choices.txt 
+    each player. The choices will be stored in an SQL 
+    table called choices. 
 
     PARAMETERS: 
 
-    None 
+    round_number (string): This is the round number you want
+    to read the choices for. 
 
     RETURNS: 
 
-    (Dictionary) a dictionary of the team choices with 
+    (Dictionary) A dictionary of the team choices with 
     player names as keys and the team choice as the value
-    """
+    '''
     query = 'select name, choice from choices where round = {}'.format(round_number)
 
     choices_df = utils.read_from_sql(query, 'name')
@@ -30,6 +32,19 @@ def read_choices(round_number):
 
 def read_points(round_number): 
     '''
+    This Function will read the points gained for each 
+    player from a specified round. 
+
+    PARAMETERS: 
+
+    round_number (string): This is the round number you want
+    to read the choices for. 
+
+    RETURNS: 
+
+    (DataFrame) A DataFrame with two columns called name and 
+    points containing the points data for each player for a 
+    specific round
     '''
     query = 'SELECT name, points FROM points WHERE round = {}'.format(round_number)
 
@@ -37,6 +52,18 @@ def read_points(round_number):
 
     return points 
 
+def read_added_info(round_number): 
+    '''
+    '''
+    query = 'SELECT draw_weekend, double_points_weekend FROM round_info WHERE round_number = {}'.format(round_number)
+
+    added_info = utils.read_from_sql(query)
+
+    DW = bool(added_info['draw_weekend'][0])
+
+    DP = bool(added_info['double_points_weekend'][0])
+
+    return DW, DP
 
 def read_scores(round_number): 
     '''
@@ -59,7 +86,7 @@ def read_results(round_number):
 
 
 def update_overall_scores(round_number): 
-    """
+    '''
     This Function will update the overall scores with the 
     scores for the week. 
 
@@ -72,10 +99,10 @@ def update_overall_scores(round_number):
     RETURNS 
     
     (Dictionary) This is the updated scores 
-    """
+    '''
     points = read_points(round_number)
 
-    scores = read_scores('1')
+    scores = read_scores(round_number)
 
     for i in points.index: 
 
@@ -197,9 +224,7 @@ def find_points(round_number, choices):
     """
     points = {}
 
-    DP = DP_round()
-
-    DW = draw_weekend(round_number)
+    DP, DW = read_added_info(round_number)
 
     winners, loosers, draws, not_played = get_team_lists(round_number)[:4]
 
@@ -230,7 +255,7 @@ def find_points(round_number, choices):
 
     points.columns = ['name', 'points', 'round']
 
-    return points, DP, DW
+    return points
 
 
 def DP_round(): 
@@ -393,7 +418,80 @@ def initialize_scores(choices):
     utils.input_into_sql(scores, 'scores', 'append')
 
 
-def main(): 
+def send_weekly_message(round_number, previous_round, thread_id): 
+    '''
+    '''
+    uname, pword = utils.get_facebook_details()
+
+    client = fbcb.login_to_facebook(uname, pword)
+
+    thread_type = client.fetchThreadInfo(thread_id)[thread_id].type
+
+    text = get_weekly_message_text(round_number, previous_round) 
+
+    fbcb.send_message(text, thread_id, thread_type, client)
+
+
+def get_weekly_message_text(round_number, previous_round):
+    '''
+    '''
+    with open('weekly_message.txt') as file: 
+        text = file.read() 
+
+    scores = get_scores_text(round_number)
+
+    standings = get_standings_text()
+
+    fixtures = fbcb.fixture_request_text("")[35:]
+
+    added_info = get_added_info_text(round_number)
+
+    return text.format(round_number, previous_round, scores, previous_round, standings, round_number, fixtures, round_number, added_info) 
+
+
+def get_standings_text(): 
+    '''
+    '''
+    query = 'SELECT name, sum(score) as points FROM scores GROUP BY name ORDER BY points DESC'
+
+    standings = utils.read_from_sql(query)
+
+    text = "Standings: \n\n"
+
+    for row in standings.iterrows():
+
+        text = text + "{}: {} \n".format(row[1]['name'], int(row[1]['points']))
+
+    return text
+
+
+def get_scores_text(round_number): 
+    '''
+    '''
+    query = "SELECT name, score FROM scores WHERE round = {} ORDER BY score DESC".format(round_number)
+
+    scores = utils.read_from_sql(query)
+
+    text = "Scores: \n\n"
+
+    for row in scores.iterrows():
+
+        text = text + "{}: {} \n".format(row[1]['name'], int(row[1]['score']))
+
+    return text 
+
+def get_added_info_text(round_number):
+    '''
+    '''
+    DW , DP = read_added_info(round_number)
+
+    text =  """Draw Weekend = {} 
+Double Points Weekend = {}""".format(DW, DP)
+     
+    return text 
+    
+
+def main(new_round, round_number): 
     """
     """
     round_number = utils.get_current_round()
@@ -402,7 +500,7 @@ def main():
 
     save_results(round_number)
 
-    points, double_weekend, draw_weekend = find_points(round_number, choices)
+    points = find_points(round_number, choices)
 
     utils.input_into_sql(points, 'points', 'append')
 
@@ -412,18 +510,8 @@ def main():
 
     utils.input_into_sql(scores, 'scores', 'append')
 
-    print('Draw Weekend = ', draw_weekend)
+    send_weekly_message(new_round, round_number,'3365583033489198')
 
-    print('Double Weekend = ', double_weekend)
+if __name__ == '__main__':
+    main('12','11')
 
-
-if __name__ == "__main__": 
-<<<<<<< HEAD
-   main()  
-=======
-    main()  
-    with open('weekly_message.txt') as file: 
-         WM = file.read() 
-    print(WM)
-    
->>>>>>> 8b933910ee71a690622b0c2dcad28c7ce9372be8

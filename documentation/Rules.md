@@ -31,7 +31,7 @@ Double Points Weekends will be determined automatically by python with a 10% cha
 
 **Draw Weekend** 
 
-2 random weekends throughout the year will be what we call "Draw Weekends". 
+Each round will have a 20% change of being a 'Draw Weekend'. 
 
 This means for this weekend a draw is now worth 2 points the other two results remain the same points win = 1 and loss = -1.
 
@@ -59,11 +59,5 @@ The list of derbys will be as follows:
 
 
 That is the full list of rules! 
-
-To make it more fun we reccomend 6 players putting in £10 each. This allows you to give prize money at the end of the season do this however you see fit but we reccomend 
-
-1) Winner gets £40 
-2) Second gets £15 
-3) Third  gets £5  
 
 ## Happy Playing Everyone! 

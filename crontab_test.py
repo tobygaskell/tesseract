@@ -1,41 +1,57 @@
 import utils 
-from datetime import date
+from datetime import datetime
+import test as main 
+import pandas as pd 
 
-def save_current_round(current_round):
+def save_current_round(round_number):
+    '''
+    '''
+    DW = main.DP_round()
+    
+    DP = main.draw_weekend(round_number)
 
-    round_txt =  open('round.txt', 'w') 
+    data = pd.DataFrame({"round_number": [round_number], 'draw_weekend': [DW], "double_points_weekend": [DP]})
 
-    round_txt.write(current_round)
+    utils.input_into_sql(data, 'round_info', 'append')
 
-    round_txt.close()
-
-    return('--round number saved--')
+    return True 
 
 
 def get_yesterdays_round(): 
+    '''
+    '''
+    query = 'SELECT round_number FROM round_info order by round_number desc limit 1 '
 
-    round_txt = open('round.txt', 'r')
-
-    yesterday_round = round_txt.read()
+    yesterday_round = utils.read_from_sql(query)['round_number'][0]
 
     return yesterday_round
+
 
 
 current_round = utils.get_current_round()
 
 yesterday_round = get_yesterdays_round()
 
-if current_round == yesterday_round: 
+if str(current_round) == str(yesterday_round): 
 
-    print(date.today())
+    print(datetime.now())
 
-    print('--Still the same round as yesterday--', end = '\n\n')
+    print('--Still the same round as yesterday--')
+
+    print('--No code called for today--', end = "\n\n")
 
 else:
-    #run(current_round, yesterday_round)
-    
+
+    print(datetime.now())
+
     save_current_round(current_round)
 
-    print(date.today())
+    print("--Round changed from {} to {}--".format(yesterday_round, current_round))
 
-    print("--Round Changed from {} to {}--".format(yesterday_round, current_round), end = '\n\n')
+    main.main(current_round, yesterday_round)
+
+    print("--main.main() Called--")
+
+    print('--Current round saved--', end = "\n\n")
+
+    

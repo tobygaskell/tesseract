@@ -163,7 +163,6 @@ def input_sql(query):
     """
     username, password, host, port, database = get_sql_details() 
 
-
     connection = con.connect(host = host, database = database,
                              user = username, password = password)
 
@@ -195,8 +194,7 @@ def get_current_round():
 
     data = pull(url)
 
-    round = data['api']['fixtures'][0]
-    print(round)
+    round = data['api']['fixtures'][0][17:]
 
     return round 
 

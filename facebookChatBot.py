@@ -17,13 +17,14 @@ class CustomClient(Client):
     def onMessage(self, message_object, author_id, thread_id, thread_type, **kwargs):
         '''
         '''
-
         relevent = check_message(thread_id)
 
-        if relevent ==  True: 
+        if relevent: 
 
             do_stuff(message_object, author_id, thread_id, thread_type) 
 
+
+# TODO: Remove check_message and add the relevent check into onMessage.
 
 def check_message(thread_id): 
     '''
@@ -51,6 +52,8 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
         if valid_submission:
 
             input_team(name, msg_obj.text)
+    else:
+        valid_submission = True 
 
     text = find_text(msg_obj.text, name, message_type, valid_submission) 
 
@@ -125,6 +128,9 @@ def evaluate_message(text):
 
     elif utils.clean_string(text) == 'Position': 
         message_type = 'Position Request'
+    
+    elif utils.clean_string(text) == 'Rules':
+        message_type = 'Rules Request'
 
     else: 
         message_type = 'Undefined'
@@ -160,11 +166,23 @@ def find_text(text, name, message_type, valid_submission):
     
     elif message_type == 'Fixture Request': 
         text = fixture_request_text(name)
+    
+    elif message_type == 'Rules Request':
+        text = rules_request_text(name)
 
     else: 
         text = None 
 
     return text 
+
+def rules_request_text(name): 
+    '''
+    '''
+    with open('documentation/Rules.md') as file: 
+        
+        text = file.read() 
+
+    return 'Hi {}, {}'.format(name, text)
 
 def non_valid_submission_text(name, text): 
     '''
@@ -193,6 +211,7 @@ def position_request_text(name):
     '''
     '''
     standings_list = find_standings()[1]
+
     for i in standings_list: 
 
         if name == i: 
@@ -217,7 +236,7 @@ def position_request_text(name):
 def choice_request_text(name): 
     '''
     '''
-    return 'Hi {name}, Sorry this Function is currently not working!!'.format(name)
+    return 'Hi {}, Sorry this Function is currently not working!!'.format(name)
 
 
 def winning_request_text(name): 
@@ -243,13 +262,15 @@ def loosing_request_text(name):
 def find_standings(): 
     '''
     '''
-    overall_scores = pd.read_csv('overall_scores.csv', index_col=0)
+    query = 'SELECT name, sum(score) as points FROM scores GROUP BY name ORDER BY points DESC'
 
-    overall_scores.sort_values(by = ['Scores'], inplace = True, ascending = False) 
+    standings = utils.read_from_sql(query)
 
-    standings_list  = list(overall_scores.index)
+    standings_list  = list(standings['name'])
 
-    standings = str(overall_scores)
+    standings = str(standings)
+
+    print(standings, standings_list )
 
     return standings, standings_list 
 
@@ -293,6 +314,8 @@ def send_message(text, thread_id, thread_type, client):
 
 if __name__ == "__main__": 
 
-    client = CustomClient('toby96@sky.com', '2002Fish2')
+    uname, pword = utils.get_facebook_details() 
+
+    client = CustomClient(uname, pword) 
 
     client.listen()
