@@ -30,7 +30,7 @@ def read_choices(round_number):
     return choices 
     
 
-def read_points(round_number): 
+def read_scores(round_number): 
     '''
     This Function will read the points gained for each 
     player from a specified round. 
@@ -46,7 +46,7 @@ def read_points(round_number):
     points containing the points data for each player for a 
     specific round
     '''
-    query = 'SELECT name, points FROM points WHERE round = {}'.format(round_number)
+    query = 'SELECT name, sum(points) as scores FROM points WHERE round = {} GROUP BY name ORDER BY scores'.format(round_number)
 
     points = utils.read_from_sql(query, 'name')
 
@@ -65,14 +65,14 @@ def read_added_info(round_number):
 
     return DW, DP
 
-def read_scores(round_number): 
+def read_points(round_number): 
     '''
     '''
-    query = 'SELECT name, score FROM scores WHERE round = {} ORDER BY score'.format(round_number)
+    query = 'SELECT name, points FROM points WHERE round = {} ORDER BY points'.format(round_number)
 
-    scores = utils.read_from_sql(query, 'name')
+    points = utils.read_from_sql(query, 'name')
 
-    return scores
+    return points
 
 
 def read_results(round_number): 
@@ -154,7 +154,7 @@ def save_results(round_number):
 
         data['scores'].append('{} - {}'.format(i['goalsAwayTeam'],i['goalsHomeTeam']))
 
-    data['round'] = utils.get_current_round() 
+    data['round'] = round_number
 
     df = pd.DataFrame(data)
 
@@ -224,7 +224,7 @@ def find_points(round_number, choices):
     """
     points = {}
 
-    DP, DW = read_added_info(round_number)
+    DW, DP = read_added_info(round_number)
 
     winners, loosers, draws, not_played = get_team_lists(round_number)[:4]
 
@@ -418,7 +418,7 @@ def initialize_scores(choices):
     utils.input_into_sql(scores, 'scores', 'append')
 
 
-def send_weekly_message(round_number, previous_round, thread_id): 
+def send_weekly_message(new_round, round_number, thread_id): 
     '''
     '''
     uname, pword = utils.get_facebook_details()
@@ -427,12 +427,12 @@ def send_weekly_message(round_number, previous_round, thread_id):
 
     thread_type = client.fetchThreadInfo(thread_id)[thread_id].type
 
-    text = get_weekly_message_text(round_number, previous_round) 
+    text = get_weekly_message_text(new_round, round_number) 
 
     fbcb.send_message(text, thread_id, thread_type, client)
 
 
-def get_weekly_message_text(round_number, previous_round):
+def get_weekly_message_text(new_round, round_number):
     '''
     '''
     with open('weekly_message.txt') as file: 
@@ -442,17 +442,34 @@ def get_weekly_message_text(round_number, previous_round):
 
     standings = get_standings_text()
 
-    fixtures = fbcb.fixture_request_text("")[35:]
+    fixtures = get_fixtures_text(new_round)
 
-    added_info = get_added_info_text(round_number)
+    added_info = get_added_info_text(new_round)
 
-    return text.format(round_number, previous_round, scores, previous_round, standings, round_number, fixtures, round_number, added_info) 
+    return text.format(new_round, round_number, scores, round_number, standings, new_round, fixtures, new_round, added_info) 
 
+
+def get_fixtures_text(round_number):
+    '''
+    '''
+    round = 'Regular_Season_-_{}'.format(round_number)
+
+    text = 'Fixtures:\n\n'
+
+    data = utils.pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/{}".format(round))
+
+    raw_data = data['api']['fixtures']
+
+    for i in raw_data: 
+
+        text += '{} vs {}\n'.format(i['homeTeam']['team_name'],i['awayTeam']['team_name']) 
+
+    return text
 
 def get_standings_text(): 
     '''
     '''
-    query = 'SELECT name, sum(score) as points FROM scores GROUP BY name ORDER BY points DESC'
+    query = 'SELECT name, sum(points) as points FROM points GROUP BY name ORDER BY points DESC'
 
     standings = utils.read_from_sql(query)
 
@@ -468,7 +485,7 @@ def get_standings_text():
 def get_scores_text(round_number): 
     '''
     '''
-    query = "SELECT name, score FROM scores WHERE round = {} ORDER BY score DESC".format(round_number)
+    query = "SELECT name, sum(points) AS scores FROM points WHERE round = {} GROUP BY name ORDER BY scores DESC".format(round_number)
 
     scores = utils.read_from_sql(query)
 
@@ -476,7 +493,7 @@ def get_scores_text(round_number):
 
     for row in scores.iterrows():
 
-        text = text + "{}: {} \n".format(row[1]['name'], int(row[1]['score']))
+        text = text + "{}: {} \n".format(row[1]['name'], int(row[1]['scores']))
 
     return text 
 
@@ -494,9 +511,27 @@ Double Points Weekend = {}""".format(DW, DP)
 def main(new_round, round_number): 
     """
     """
-    round_number = utils.get_current_round()
-
     choices = read_choices(round_number)
+
+    print(len(choices))
+
+    if len(choices) == 0: 
+
+        with open('intro.txt') as file:
+
+            text = file.read() 
+
+            text = text.format(get_fixtures_text(new_round))
+
+        uname, pword = utils.get_facebook_details()
+
+        client = fbcb.login_to_facebook(uname, pword)
+
+        thread_type = client.fetchThreadInfo('3365583033489198')['3365583033489198'].type
+
+        fbcb.send_message(text, '3365583033489198', thread_type, client)
+
+        return True  
 
     save_results(round_number)
 
@@ -504,14 +539,8 @@ def main(new_round, round_number):
 
     utils.input_into_sql(points, 'points', 'append')
 
-    initialize_scores(choices) 
-
-    scores = update_overall_scores(round_number)
-
-    utils.input_into_sql(scores, 'scores', 'append')
-
     send_weekly_message(new_round, round_number,'3365583033489198')
 
-if __name__ == '__main__':
-    main('12','11')
+# if __name__ == '__main__':
+#     main('12','11')
 

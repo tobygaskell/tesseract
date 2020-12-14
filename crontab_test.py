@@ -25,8 +25,7 @@ def get_yesterdays_round():
     yesterday_round = utils.read_from_sql(query)['round_number'][0]
 
     return yesterday_round
-
-
+    
 
 current_round = utils.get_current_round()
 

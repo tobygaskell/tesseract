@@ -35,10 +35,10 @@ the game going.
 
 The game and chat bot is built in python, because python is the GOAT. Some of you may 
 be asking but surely there is a much better language to build such a game in. To you i 
-say FU PYTHON FTW! But no yes there probably is but as i have mentioned this project was a 
+say PYTHON FTW! But yes there probably is but as i have mentioned this project was a 
 oportunity to teach myself infrastructure not a new coding language. Hense why i have 
 stuck with Python. Anyone who wants to look into the code is more than welcome to do 
-so and will find it here ... 
+so and will find it here https://github.com/tobygaskell/tesseract.git 
 
 At the start of a new round in the premire league our chat bot will automatically message 
 the group chat with: 
@@ -75,11 +75,10 @@ So that is it. All the late night coding sessions and the endless typing has fin
 reached the testing stage! I hope you all enjoy playing and as i say please do bare 
 with me if anything goes wrong!! 
 
+ALSO, Please excuse my spelling and grammar! I have been doing this mostly at night and 
+my spelling and grammar arent the best under normal circumstances. i just appologise to
+those who are affended by my poor english skills. 
+
+The first set of fixtures we have to pick from are:
+{}
 Happy predicting! 
-
-hello this is a modification
-
-
-
-
-

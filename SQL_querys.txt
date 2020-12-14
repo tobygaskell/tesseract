@@ -1,0 +1,22 @@
+individual_season_query = '''
+SELECT a.choice, b.apponent, b.result, a.round, c.double_points_weekend AS DP, c.draw_weekend AS DW, d.points, SUM(d.points) OVER (ORDER BY round) AS total_points 
+FROM choices a , results b, round_info c, points d 
+WHERE  a.name like 'C%' 
+AND a.choice = b.team 
+AND a.round = b.round 
+AND b.round = c.round_number 
+AND a.round = d.round 
+AND a.name = d.name'''
+
+count_of_results_query = '''SELECT result, count(result) AS count FROM (
+SELECT a.choice, b.apponent, b.result, a.round, c.double_points_weekend AS DP, c.draw_weekend AS DW, d.points, SUM(d.points) OVER (ORDER BY round) AS total_points 
+FROM choices a , results b, round_info c, points d 
+WHERE  a.name like 'C%' 
+AND a.choice = b.team 
+AND a.round = b.round 
+AND b.round = c.round_number 
+AND a.round = d.round 
+AND a.name = d.name ) AS e 
+GROUP BY result 
+ORDER BY count DESC'''
+
