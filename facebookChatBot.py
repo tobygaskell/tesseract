@@ -50,8 +50,15 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
         valid_submission = check_validity(name, msg_obj.text)
 
         if valid_submission:
+            
+            submitted = check_if_already_submitted(name)
+
+            if submitted:
+
+                remove_first_choices(name)
 
             input_team(name, msg_obj.text)
+
     else:
         valid_submission = True 
 
@@ -61,6 +68,27 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
 
         send_message(text, thread_id, thread_type, client)
 
+
+def check_if_already_submitted(name):
+    '''
+    '''
+    query = 'SELECT COUNT(choice) AS num FROM choices WHERE name = "{}" AND round = {}'.format(name, utils.get_current_round())
+
+    num = utils.read_from_sql(query)['num'][0]
+
+    if num > 0: 
+
+        return True 
+
+    return False 
+
+
+def remove_first_choices(name): 
+    '''
+    '''
+    query = 'DELETE FROM choices WHERE name = "{}" AND round = {}'.format(name, utils.get_current_round())
+
+    utils.input_sql(query)
 
 def check_validity(name, message): 
     '''
