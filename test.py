@@ -46,7 +46,7 @@ def read_scores(round_number):
     points containing the points data for each player for a 
     specific round
     '''
-    query = 'SELECT name, sum(points) as scores FROM points WHERE round = {} GROUP BY name ORDER BY scores'.format(round_number)
+    query = 'SELECT name, sum(points) as scores FROM points GROUP BY name ORDER BY scores'
 
     points = utils.read_from_sql(query, 'name')
 
@@ -543,5 +543,3 @@ def main(new_round, round_number):
 
 # if __name__ == '__main__':
 #     main('12','11')
-
-hello this is an insertion 

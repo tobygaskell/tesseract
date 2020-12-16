@@ -2,6 +2,7 @@ import string, configparser, json, requests
 from sqlalchemy import create_engine 
 import mysql.connector as con 
 import pandas as pd 
+from datetime import datetime 
 
 
 def clean_string(text):
@@ -76,6 +77,17 @@ def get_facebook_details():
 
     return username, password
 
+
+def get_thread_id(): 
+    '''
+    '''
+    config = configparser.ConfigParser() 
+
+    config.read('config.ini')
+
+    thread_id = config['facebook']['thread_id']
+
+    return thread_id
 
 def get_sql_details(): 
 
@@ -223,3 +235,24 @@ def pull(url):
     data = json.loads(response.text) 
 
     return data 
+
+def get_earliest_kickoff(round_number): 
+    '''
+    '''
+    query = 'SELECT earliest_kickoff FROM round_info WHERE round_number = {}'.format(round_number)
+
+    kick_off = read_from_sql(query)['earliest_kickoff'][0]
+    
+    return datetime.strptime(kick_off, '%Y-%m-%d %H:%M:%S')
+
+
+def find_earliest_kickoff(round_number): 
+    '''
+    '''
+    data = pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/Regular_Season_-_{}".format(round_number))
+
+    sorted_kickoffs = sorted([datetime.strptime(i['event_date'], '%Y-%m-%dT%H:%M:%S+%f:00') for i in data['api']['fixtures']], reverse = False) 
+
+    earliest_kickoff = sorted_kickoffs[0]
+
+    return earliest_kickoff 

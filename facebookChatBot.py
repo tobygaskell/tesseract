@@ -6,8 +6,6 @@ import utils
 def login_to_facebook(username, password): 
     '''
     '''
-    print(username)
-    print(password)
     client = CustomClient(username, password)
     return client 
 
@@ -29,13 +27,13 @@ class CustomClient(Client):
 def check_message(thread_id): 
     '''
     '''
-    if thread_id == '3365583033489198': 
+    if thread_id == utils.get_thread_id(): 
 
         relevent_message = True
 
     else: 
         relevent_message = False 
-
+    print(relevent_message)
     return relevent_message
 
 def do_stuff(msg_obj, author_id, thread_id, thread_type):
@@ -47,7 +45,7 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
 
     if message_type == 'Team Submission': 
 
-        valid_submission = check_validity(name, msg_obj.text)
+        valid_submission = check_validity(name, msg_obj)
 
         if valid_submission:
             
@@ -62,12 +60,11 @@ def do_stuff(msg_obj, author_id, thread_id, thread_type):
     else:
         valid_submission = True 
 
-    text = find_text(msg_obj.text, name, message_type, valid_submission) 
+    text = find_text(msg_obj, name, message_type, valid_submission) 
 
     if text != None: 
 
         send_message(text, thread_id, thread_type, client)
-
 
 def check_if_already_submitted(name):
     '''
@@ -90,7 +87,38 @@ def remove_first_choices(name):
 
     utils.input_sql(query)
 
-def check_validity(name, message): 
+
+def check_validity(name, msg_obj):
+    '''
+    '''
+    time_valid = check_time_validity(msg_obj)
+
+    choice_valid = check_choice_validity(name, msg_obj.text)
+
+    if time_valid and choice_valid: 
+        valid = True 
+
+    else:
+        valid = False 
+
+    return valid
+
+def check_time_validity(msg_obj): 
+    '''
+    '''
+    kick_off = utils.get_earliest_kickoff(utils.get_current_round())
+
+    time = msg_obj.timestamp 
+
+    if kick_off.timestamp() < time: 
+        valid = False 
+
+    else: 
+        valid = True 
+
+    return valid
+
+def check_choice_validity(name, message): 
     '''
     '''
     team = utils.clean_string(message.split('=')[1])
@@ -165,17 +193,14 @@ def evaluate_message(text):
 
     return message_type
 
-def find_text(text, name, message_type, valid_submission): 
+def find_text(msg_obj, name, message_type, valid_submission): 
     '''
     '''
     if message_type == "Help Request": 
         text = help_request_text(name)
         
-    elif message_type == 'Team Submission' and valid_submission == True: 
-        text = team_submission_text(name, text)
-
-    elif message_type == 'Team Submission' and valid_submission == False: 
-        text = non_valid_submission_text(name, text)
+    elif message_type == 'Team Submission':
+        text = get_team_submission_text(name, msg_obj, valid_submission)
 
     elif message_type == 'Standing Request': 
         text = standing_request_text(name)
@@ -203,6 +228,28 @@ def find_text(text, name, message_type, valid_submission):
 
     return text 
 
+def get_team_submission_text(name, msg_obj, valid_submission): 
+    '''
+    '''
+
+    if  valid_submission: 
+        text = team_submission_text(name, msg_obj.text)
+
+    else:
+        time_valid = check_time_validity(msg_obj)
+
+        choice_valid = check_choice_validity(name, msg_obj.text)
+
+        if time_valid != False: 
+            text = time_not_valid_text(name)
+
+        elif choice_valid == False: 
+            text = choice_not_valid_text(name, msg_obj.text)
+
+    return text 
+def time_not_valid_text(name): 
+    return "Hi {}, you have missed the deadline for this weeks submission, you will get -2 points for this round".format(name)
+
 def rules_request_text(name): 
     '''
     '''
@@ -212,7 +259,7 @@ def rules_request_text(name):
 
     return 'Hi {}, {}'.format(name, text)
 
-def non_valid_submission_text(name, text): 
+def choice_not_valid_text(name, text): 
     '''
     '''
     return "Hi {}, you have chosen {} too many times. Please make a new submission".format(name, utils.clean_string(text.split('=')[1]))
