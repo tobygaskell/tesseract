@@ -1,10 +1,8 @@
 venv/
 __pycache__
 config.ini
-points/ 
-overall_scores.csv
 *.ipynb
-results/
-out.txt
 .DS_Store 
 feature_ideas.txt
+*.__pycache__
+*.pyc 

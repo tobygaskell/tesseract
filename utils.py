@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 import mysql.connector as con 
 import pandas as pd 
 from datetime import datetime 
+from difflib import SequenceMatcher
 
 
 def clean_string(text):
@@ -89,6 +90,7 @@ def get_thread_id():
 
     return thread_id
 
+
 def get_sql_details(): 
 
     # TODO: change the doc stings so they match the new functionality 
@@ -122,6 +124,7 @@ def get_sql_details():
     host = config['mysql']['host']
 
     return username, password, host, port, database 
+
 
 def create_sql_connection():
     '''
@@ -236,6 +239,7 @@ def pull(url):
 
     return data 
 
+
 def get_earliest_kickoff(round_number): 
     '''
     '''
@@ -256,3 +260,29 @@ def find_earliest_kickoff(round_number):
     earliest_kickoff = sorted_kickoffs[0]
 
     return earliest_kickoff 
+
+
+def get_all_teams(): 
+    '''
+    '''
+    data = pull('https://api-football-v1.p.rapidapi.com/v2/teams/league/2790')
+
+    team_names = [i['name'] for i in data['api']['teams']]
+
+    return team_names
+
+
+def find_closest_team(choice): 
+    '''
+    '''
+    teams = get_all_teams()
+
+    choice = clean_string(choice)
+
+    teams_compared = [(team, SequenceMatcher(None,team, choice).ratio()) for team in teams]
+
+    smallest_distance = max([i[1] for i in teams_compared])
+
+    closest_match = [i[0] for i in teams_compared if i[1] == smallest_distance]
+
+    return closest_match[0]

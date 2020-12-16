@@ -4,13 +4,7 @@ import test as main
 import random, string
 
 
-teams = []
-
-for i in main.get_team_lists('12')[:4]:
-    
-    teams = teams + i
-
-print(len(teams)) 
+teams = utils.get_all_teams() 
 
 def add_dummy_choices(num_of_players):
     '''
@@ -47,6 +41,7 @@ def add_dummy_added_info():
         DW = main.DP_round() 
 
         DP = main.draw_weekend(round)
+        
         kickoff = utils.find_earliest_kickoff(str(round)) 
     
         data = pd.DataFrame({'round_number': [round], 'draw_weekend': [DW], 'double_points_weekend':[DP], 'earliest_kickoff':[kickoff]})

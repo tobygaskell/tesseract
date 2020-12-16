@@ -10,7 +10,9 @@ def save_current_round(round_number):
     
     DP = main.draw_weekend(round_number)
 
-    data = pd.DataFrame({"round_number": [round_number], 'draw_weekend': [DW], "double_points_weekend": [DP]})
+    kickoff = utils.find_earliest_kickoff(str(round)) 
+    
+    data = pd.DataFrame({'round_number': [round], 'draw_weekend': [DW], 'double_points_weekend':[DP], 'earliest_kickoff':[kickoff]})
 
     utils.input_into_sql(data, 'round_info', 'append')
 

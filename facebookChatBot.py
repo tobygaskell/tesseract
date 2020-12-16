@@ -1,6 +1,7 @@
 from fbchat import Client
 import pandas as pd
 import utils
+from datetime import datetime 
 
 
 def login_to_facebook(username, password): 
@@ -107,8 +108,8 @@ def check_time_validity(msg_obj):
     '''
     '''
     kick_off = utils.get_earliest_kickoff(utils.get_current_round())
-
-    time = msg_obj.timestamp 
+    
+    time = msg_obj.timestamp / 1000 
 
     if kick_off.timestamp() < time: 
         valid = False 
@@ -144,9 +145,9 @@ def input_team(name, message):
     '''
     round = utils.get_current_round()
 
-    team = utils.clean_string(message.split('=')[1])
+    team = utils.find_closest_team(message.split('=')[1])
 
-    query = "INSERT INTO choices (name, choice, round) VALUES ('{}', '{}', '{}');".format(name, team, round)
+    query = "INSERT INTO choices (name, choice, round) VALUES ('{}', '{}', '{}')".format(name, team, round)
 
     return utils.input_sql(query)
 
@@ -240,15 +241,20 @@ def get_team_submission_text(name, msg_obj, valid_submission):
 
         choice_valid = check_choice_validity(name, msg_obj.text)
 
-        if time_valid != False: 
+        if time_valid == False: 
             text = time_not_valid_text(name)
 
         elif choice_valid == False: 
             text = choice_not_valid_text(name, msg_obj.text)
 
     return text 
+
+
 def time_not_valid_text(name): 
-    return "Hi {}, you have missed the deadline for this weeks submission, you will get -2 points for this round".format(name)
+    '''
+    '''
+    return "Hi {}, you have missed the deadline for this weeks submission, you will be scores as though the team you picked had lost.".format(name)
+
 
 def rules_request_text(name): 
     '''
@@ -259,17 +265,19 @@ def rules_request_text(name):
 
     return 'Hi {}, {}'.format(name, text)
 
+
 def choice_not_valid_text(name, text): 
     '''
     '''
-    return "Hi {}, you have chosen {} too many times. Please make a new submission".format(name, utils.clean_string(text.split('=')[1]))
+    return "Hi {}, you have chosen {} too many times. Please make a new submission".format(name, utils.find_closest_team(text.split('=')[1]))
+
 
 def team_submission_text(name, text): 
     '''
     '''
     return '''Hi {}, you have submitted {} as your team for this week!
 
-If this is incorrect please redo your submission'''.format(name, utils.clean_string(text.split('=')[1]))
+If this is incorrect please redo your submission'''.format(name, utils.find_closest_team(text.split('=')[1]) )
 
 
 def standing_request_text(name): 
