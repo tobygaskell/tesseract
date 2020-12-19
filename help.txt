@@ -8,7 +8,8 @@
 - 'standings' - This will give you the position of each of the players.
 - 'position' - This will give you your current position in the leaderboard.
 - 'choices' - This will give you your eligable choices for the upcomming round.
-- 'fixtures' - This will give you the upcoming fixtures for that round
+- 'fixtures' - This will give you the upcoming fixtures for that round.
+- 'rules' - This will give you the rules of the FPG. 
 
 ## Inputs
 
@@ -18,5 +19,3 @@
 - Please try to use the chat one at a time 
 - Please don't spam the chat 
 - Please when giving team choices don't use abriviations
-
-

@@ -1,5 +1,6 @@
 import pandas as pd 
 import utils 
+from datetime import datetime
 
 
 def read_choices(round_number):
@@ -18,9 +19,18 @@ def read_choices(round_number):
     (choices) A Dictionary of the team choices with 
     player names as keys and the team choice as the value
     '''
-    query = 'SELECT name, choice FROM choices WHERE round = {}'.format(round_number)
+    try: 
+        query = 'SELECT name, choice FROM choices WHERE round = {}'.format(round_number)
 
-    choices_df = utils.read_from_sql(query, 'name')
+        choices_df = utils.read_from_sql(query, 'name')
+        
+        if len(choices_df) == 0:
+
+            raise NoDataError
+    
+    except NoDataError:
+        
+        print('There were no choices for round {} in the data base'.format(round_number))
 
     choices = choices_df.to_dict(orient='index')    
 
@@ -70,7 +80,7 @@ def read_scores():
     (scores) A DataFrame with two columns called name and 
     scores containing the scores data for each player.
     '''
-    query = 'SELECT name, SUM(points) AS scores FROM points GROUP BY name ORDER BY scores'
+    query = 'SELECT name, SUM(points) AS scores FROM points GROUP BY name ORDER BY scores DESC'
 
     scores = utils.read_from_sql(query, 'name')
 
@@ -121,3 +131,62 @@ def read_results(round_number):
     results = utils.read_from_sql(query)
 
     return results
+
+def read_kickoffs(round_number): 
+    '''
+    This Function will read the earliest and latest kickoffs for 
+    a given round from the round_info table in SQL.
+
+    PARAMETERS: 
+
+    round_number (string): This is the round number in which 
+    you want to find the kickoffs for. 
+
+    RETRURNS: 
+
+    (earliest_kickoff) A DateTime object for the time of the earliest 
+    kickoff for the given round.
+    (latest_kickoff) A DateTime object for the time of the latest kickoff 
+    for the given round.
+
+    '''
+    query = 'SELECT earliest_kickoff, latest_kickoff FROM round_info WHERE round_number = {}'.format(round_number)
+    
+    kickoffs_df = utils.read_from_sql(query)
+
+    early = kickoffs_df['earliest_kickoff'][0]
+
+    late = kickoffs_df['latest_kickoff'][0]
+
+    earliest_kickoff = datetime.strptime(early, '%Y-%m-%d %H:%M:%S')
+
+    latest_kickoff = datetime.strptime(late, '%Y-%m-%d %H:%M:%S')
+    
+    return earliest_kickoff, latest_kickoff
+
+
+def read_last_round_number(): 
+    '''
+    This Function will read the largest round_number stored in the 
+    round_info SQL table
+
+    PARAMETERS: 
+
+    NONE
+
+    RETURS: 
+
+    last_round_number (string) a sting of the biggest round number stored 
+    in the round_info SQL table (used as the round_number for the last round)
+    '''
+    query = 'SELECT round_number FROM round_info ORDER BY round_number DESC LIMIT 1'
+    
+    last_round_df = utils.read_from_sql(query)
+
+    last_round_number = str(last_round_df['round_number'][0])
+
+    return last_round_number
+
+
+class NoDataError(Exception):
+    pass 

@@ -18,9 +18,11 @@ class CustomClient(Client):
         '''
         relevent = check_message(thread_id)
 
+        round_number = utils.get_current_round()
+
         if relevent: 
 
-            do_stuff(message_object, author_id, thread_id, thread_type) 
+            do_stuff(message_object, round_number, False, author_id, thread_id, thread_type) 
 
 
 # TODO: Remove check_message and add the relevent check into onMessage.
@@ -34,43 +36,54 @@ def check_message(thread_id):
 
     else: 
         relevent_message = False 
-    print(relevent_message)
+
     return relevent_message
 
-def do_stuff(msg_obj, author_id, thread_id, thread_type):
+
+def do_stuff(msg_obj, round_number, testing = False, author_id = False, thread_id = False, thread_type = False):
     '''
-    '''
-    name = find_author_name(author_id)
+    ''' 
+    if testing == True: 
+
+        name = msg_obj.author
+
+    else: 
+
+        name = find_author_name(author_id)
 
     message_type = evaluate_message(msg_obj.text)
 
     if message_type == 'Team Submission': 
 
-        valid_submission = check_validity(name, msg_obj)
+        valid_submission = check_validity(name, msg_obj, round_number)
 
         if valid_submission:
             
-            submitted = check_if_already_submitted(name)
+            submitted = check_if_already_submitted(name, round_number)
 
             if submitted:
 
-                remove_first_choices(name)
+                remove_first_choices(name, round_number)
 
-            input_team(name, msg_obj.text)
+            input_team(name, msg_obj.text, round_number)
 
     else:
         valid_submission = True 
 
-    text = find_text(msg_obj, name, message_type, valid_submission) 
+    text = find_text(msg_obj, name, message_type, valid_submission, round_number) 
 
-    if text != None: 
+    if text != None and testing == False: 
 
         send_message(text, thread_id, thread_type, client)
 
-def check_if_already_submitted(name):
+    else: 
+        return text
+
+
+def check_if_already_submitted(name, round_number):
     '''
     '''
-    query = 'SELECT COUNT(choice) AS num FROM choices WHERE name = "{}" AND round = {}'.format(name, utils.get_current_round())
+    query = 'SELECT COUNT(choice) AS num FROM choices WHERE name = "{}" AND round = {}'.format(name, round_number)
 
     num = utils.read_from_sql(query)['num'][0]
 
@@ -81,18 +94,17 @@ def check_if_already_submitted(name):
     return False 
 
 
-def remove_first_choices(name): 
+def remove_first_choices(name, round_number): 
     '''
     '''
-    query = 'DELETE FROM choices WHERE name = "{}" AND round = {}'.format(name, utils.get_current_round())
-
+    query = 'DELETE FROM choices WHERE name = "{}" AND round = {}'.format(name, round_number )
     utils.input_sql(query)
 
 
-def check_validity(name, msg_obj):
+def check_validity(name, msg_obj, round_number):
     '''
     '''
-    time_valid = check_time_validity(msg_obj)
+    time_valid = check_time_validity(msg_obj, round_number)
 
     choice_valid = check_choice_validity(name, msg_obj.text)
 
@@ -104,20 +116,25 @@ def check_validity(name, msg_obj):
 
     return valid
 
-def check_time_validity(msg_obj): 
+
+def check_time_validity(msg_obj, round_number): 
     '''
     '''
-    kick_off = utils.get_earliest_kickoff(utils.get_current_round())
+
+    kick_off = utils.get_earliest_kickoff(round_number)
     
     time = msg_obj.timestamp / 1000 
 
-    if kick_off.timestamp() < time: 
+    print(kick_off, 'vs', time)
+
+    if kick_off.timestamp() <= time: 
         valid = False 
 
     else: 
         valid = True 
 
     return valid
+
 
 def check_choice_validity(name, message): 
     '''
@@ -140,10 +157,11 @@ def check_choice_validity(name, message):
 
     return validity 
 
-def input_team(name, message): 
+
+def input_team(name, message, round): 
     '''
     '''
-    round = utils.get_current_round()
+    # round = utils.get_current_round()
 
     team = utils.find_closest_team(message.split('=')[1])
 
@@ -158,6 +176,7 @@ def find_author_name(author_id):
     user = client.fetchUserInfo(author_id)[author_id]
 
     return user.name
+
 
 def evaluate_message(text):
     '''
@@ -194,14 +213,15 @@ def evaluate_message(text):
 
     return message_type
 
-def find_text(msg_obj, name, message_type, valid_submission): 
+
+def find_text(msg_obj, name, message_type, valid_submission, round_number): 
     '''
     '''
     if message_type == "Help Request": 
         text = help_request_text(name)
         
     elif message_type == 'Team Submission':
-        text = get_team_submission_text(name, msg_obj, valid_submission)
+        text = get_team_submission_text(name, msg_obj, valid_submission, round_number)
 
     elif message_type == 'Standing Request': 
         text = standing_request_text(name)
@@ -219,7 +239,7 @@ def find_text(msg_obj, name, message_type, valid_submission):
         text = choice_request_text(name)
     
     elif message_type == 'Fixture Request': 
-        text = fixture_request_text(name)
+        text = fixture_request_text(name, round_number)
     
     elif message_type == 'Rules Request':
         text = rules_request_text(name)
@@ -229,7 +249,8 @@ def find_text(msg_obj, name, message_type, valid_submission):
 
     return text 
 
-def get_team_submission_text(name, msg_obj, valid_submission): 
+
+def get_team_submission_text(name, msg_obj, valid_submission, round_number): 
     '''
     '''
 
@@ -237,7 +258,7 @@ def get_team_submission_text(name, msg_obj, valid_submission):
         text = team_submission_text(name, msg_obj.text)
 
     else:
-        time_valid = check_time_validity(msg_obj)
+        time_valid = check_time_validity(msg_obj, round_number)
 
         choice_valid = check_choice_validity(name, msg_obj.text)
 
@@ -290,6 +311,7 @@ def standing_request_text(name):
 
     return text 
 
+
 def position_request_text(name): 
     '''
     '''
@@ -315,6 +337,7 @@ def position_request_text(name):
         pos = str(pos) + 'th'
 
     return 'Hi {}, you are currently {} in the standings'.format(name, pos)
+
 
 def choice_request_text(name): 
     '''
@@ -358,10 +381,9 @@ def find_standings():
     return standings, standings_list 
 
 
-def fixture_request_text(name):
+def fixture_request_text(name, round_number):
     '''
     '''
-    round_number = utils.get_current_round()
 
     round = 'Regular_Season_-_{}'.format(round_number)
 
@@ -376,6 +398,7 @@ def fixture_request_text(name):
         text += '{} vs {}\n'.format(i['homeTeam']['team_name'],i['awayTeam']['team_name']) 
 
     return text
+
 
 def help_request_text(name): 
     '''

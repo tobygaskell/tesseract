@@ -92,9 +92,7 @@ def get_thread_id():
 
 
 def get_sql_details(): 
-
     # TODO: change the doc stings so they match the new functionality 
-
     """
     This function will read the SQL connection details for 
     the SQL server being used to store the game data on and 
@@ -157,9 +155,17 @@ def input_into_sql(df, table, how):
     '''
     conn = create_sql_connection()
 
-    df.to_sql(table, conn, index = False,  if_exists = how)
+    try:
 
-    return '--table updated--'
+        df.to_sql(table, conn, index = False,  if_exists = how)
+        
+        inputted = True 
+
+    except: 
+
+        inputted = False 
+
+    return inputted
 
 
 
@@ -215,7 +221,6 @@ def get_current_round():
 
 
 def pull(url):
-
     """
     This function will pull the data down from
     the football API it automatically pulls the 
@@ -229,7 +234,6 @@ def pull(url):
     RETURNS: 
 
     (dictionary) This is the data from the API you requested 
-
     """
     headers = get_api_details() 
 
@@ -240,17 +244,17 @@ def pull(url):
     return data 
 
 
-def get_earliest_kickoff(round_number): 
-    '''
-    '''
-    query = 'SELECT earliest_kickoff FROM round_info WHERE round_number = {}'.format(round_number)
+# def get_earliest_kickoff(round_number): 
+#     '''
+#     '''
+#     query = 'SELECT earliest_kickoff FROM round_info WHERE round_number = {}'.format(round_number)
 
-    kick_off = read_from_sql(query)['earliest_kickoff'][0]
+#     kick_off = read_from_sql(query)['earliest_kickoff'][0]
     
-    return datetime.strptime(kick_off, '%Y-%m-%d %H:%M:%S')
+#     return datetime.strptime(kick_off, '%Y-%m-%d %H:%M:%S')
 
 
-def find_earliest_kickoff(round_number): 
+def find_kickoffs(round_number): 
     '''
     '''
     data = pull("https://api-football-v1.p.rapidapi.com/v2/fixtures/league/2790/Regular_Season_-_{}".format(round_number))
@@ -259,7 +263,9 @@ def find_earliest_kickoff(round_number):
 
     earliest_kickoff = sorted_kickoffs[0]
 
-    return earliest_kickoff 
+    latest_kickoff = sorted_kickoffs[-1]
+
+    return earliest_kickoff, latest_kickoff
 
 
 def get_all_teams(): 
