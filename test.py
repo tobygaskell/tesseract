@@ -88,7 +88,7 @@ def read_results(round_number):
 
     return results
 
-
+# MOVED 
 def find_teams_that_played(raw_data): 
     """
     """
@@ -106,7 +106,7 @@ def find_teams_that_played(raw_data):
  
     return played, not_played 
 
-
+# MOVED 
 def save_results(round_number): 
     """
     """
@@ -138,7 +138,7 @@ def save_results(round_number):
 
     return utils.input_into_sql(df, 'results', 'append')
 
-
+# MOVED 
 def get_result(team_name, round_number):
     """
     """
@@ -158,7 +158,7 @@ def get_result(team_name, round_number):
 
     return result 
 
-
+# MOVED 
 def remove_draws(played, draws): 
     """
     """
@@ -171,7 +171,7 @@ def remove_draws(played, draws):
 
     return played_
 
-
+# MOVED 
 def find_winners_and_loosers(wins_and_loss):
     """
     """ 
@@ -182,7 +182,7 @@ def find_winners_and_loosers(wins_and_loss):
                                           else i['awayTeam']['team_name'] for i in wins_and_loss]
     return winners, loosers
 
-
+# MOVED 
 def find_draws(played): 
     """
     """
@@ -196,7 +196,7 @@ def find_draws(played):
             draws.append(i['awayTeam']['team_name'])
     return draws 
 
-
+# MOVED 
 def find_points(round_number, choices): 
     """
     """
@@ -236,18 +236,7 @@ def find_points(round_number, choices):
     return points
 
 
-def DP_round(): 
-    """
-    """
-    return random.randrange(10) > 8  
-
-
-def draw_weekend(): 
-    """
-    """
-    return random.randrange(100) > 80
-
-
+# MOVED 
 def round_worth(value, choice, choices, round_number, double_points): 
     """
     """
@@ -266,7 +255,7 @@ def round_worth(value, choice, choices, round_number, double_points):
 
     return value  
 
-
+# MOVED 
 def draws_round_worth(value, choice, round_number, draw_weekend):
     """
     """
@@ -285,7 +274,7 @@ def draws_round_worth(value, choice, round_number, draw_weekend):
 
     return value
 
-
+# MOVED 
 def played_in_a_derby(choice, round_number): 
     """
     """
@@ -310,7 +299,7 @@ def played_in_a_derby(choice, round_number):
 
     return derby 
 
-
+# MOVED 
 def played_head_to_head(choice, choices, round_number):
     """
     """
@@ -327,16 +316,7 @@ def played_head_to_head(choice, choices, round_number):
     return head_to_head
 
 
-# def get_all_teams(): 
-#     """
-#     """
-#     data = utils.pull('https://api-football-v1.p.rapidapi.com/v2/teams/league/2790') 
-
-#     teams = [i['name'] for i in data['api']['teams']]
-
-#     return teams 
-
-
+# MOVED 
 def get_team_lists(round_number): 
     """
     """
@@ -353,20 +333,10 @@ def get_team_lists(round_number):
     return wins, loss, draws, not_played, played 
 
 
-# def initialize_scores(choices):
-#     '''
-#     '''
-#     df = {k:0 for k in choices.keys()}
 
-#     scores = pd.DataFrame(df, index = ['scores']).T
 
-#     scores = scores.reset_index()
 
-#     scores['round'] = '1'
 
-#     scores.columns = ['name', 'score', 'round']
-    
-#     utils.input_into_sql(scores, 'scores', 'append')
 
 
 def send_weekly_message(new_round, round_number, thread_id, testing = False): 
@@ -451,13 +421,25 @@ def get_points_text(round_number):
 def get_added_info_text(round_number):
     '''
     '''
-    DW , DP = read_added_info(round_number)
+    DW, DP = read_added_info(round_number)
 
     text =  """Draw Weekend = {} 
 Double Points Weekend = {}""".format(DW, DP)
      
     return text 
     
+
+def DP_round(): 
+    """
+    """
+    return random.randrange(10) > 8  
+
+
+def draw_weekend(): 
+    """
+    """
+    return random.randrange(100) > 80
+
 
 def main(new_round, round_number, testing = False): 
     """
@@ -492,3 +474,20 @@ def main(new_round, round_number, testing = False):
 
 # if __name__ == '__main__':
 #     main('12','11')
+
+
+
+# def initialize_scores(choices):
+#     '''
+#     '''
+#     df = {k:0 for k in choices.keys()}
+
+#     scores = pd.DataFrame(df, index = ['scores']).T
+
+#     scores = scores.reset_index()
+
+#     scores['round'] = '1'
+
+#     scores.columns = ['name', 'score', 'round']
+    
+#     utils.input_into_sql(scores, 'scores', 'append')

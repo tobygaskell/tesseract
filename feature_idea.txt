@@ -1,8 +1,8 @@
 Features Ideas: 
 
     1) Send a message out to indicate that the matches have started and 
-    that you can no longer input your choice and what the people playing
-    have chosen for this week 
+    that you can no longer input your choice and include in that message 
+    what the people playing have chosen for this week 
 
     2) Add the fuctionality for the 'Choices' function on the ChatBot 
 
@@ -13,8 +13,12 @@ Code Improvements:
     1) Refactor all my code into seperate python files. 
     2) Add a testing system that can test most eventualities
     3) Remove all string comparisons and convert to ID's 
-    4) Move all message texts to there own file to allow ease of access for changes.
-    5) 
+    4) Move all message texts to there own file to allow ease of access 
+    for changes.
+    5) Rework the rules so they match the code 
+    6) Document the whole repo for other coders to read
+    7) Rework all the messages sent out to improve the functionality 
+    8) 
 
 
 Ultimate Plan 
