@@ -126,7 +126,7 @@ def read_results(round_number):
     Team contains the team names, the apponent is the name of the team they 
     played in that round, results whether the won lost or drew. 
     '''
-    query = 'SELECT name, apponent, result, score FROM results WHERE round = {}'.format(round_number)
+    query = 'SELECT team, apponent, result, scores FROM results WHERE round = {}'.format(round_number)
 
     results = utils.read_from_sql(query)
 

@@ -24,6 +24,7 @@ def get_raw_data(round_number):
     
     return raw_data
 
+
 def find_teams_that_played(raw_data): 
     '''
     This Function will filter out the teams into two lists,
@@ -55,7 +56,7 @@ def find_teams_that_played(raw_data):
 
     #         not_played.append(i['awayTeam']['team_name'])
  
-    return played # , not_played
+    return played
 
 
 def find_draws(played): 
@@ -85,6 +86,7 @@ def find_draws(played):
             draws.append(i['awayTeam']['team_name'])
 
     return draws 
+
 
 def remove_draws(played, draws): 
     '''
@@ -161,7 +163,6 @@ def get_team_lists(played):
     (loss) This is the list of teams who lost that round. 
     (draws) This is the list of team who drew that round. 
     '''
-
     draws = find_draws(played)
 
     wins_and_loss = remove_draws(played, draws)
@@ -171,11 +172,30 @@ def get_team_lists(played):
     return wins, loss, draws
 
 
-
 # TODO: get it so that this function also saves the results for teams who havent played. 
 
 def save_results(round_number, played, winners, loosers, draws): 
     '''
+    This Function will take the cleaned data from the API and 
+    save it into tabular form in our SQL database. The table has 
+    5 Columns team which is the team in question, apponent which 
+    is the team who the team in question was playing for that round 
+    results is if the team won, lost or drew. Finally score is the 
+    final score of the round. 
+
+    PARAMETERS: 
+
+    round_number (string): The round number in which you are saving the 
+    results from. 
+    played (list): The list of fixture objects, for which the game finnished. 
+    winners (list):The list of the team names for the teams who won that round.
+    loosers (list): The list of the team names for the teams who lost that round.
+    draws (list): The list of the team names for the teams that drew that round. 
+
+    RETURNS 
+
+    inputted (boolean) True if the data was inputted successfully and False if the 
+    data input didn't work.
     '''
     data = {'team':[],'apponent': [],'result': [],'scores': []} 
 
@@ -208,6 +228,24 @@ def save_results(round_number, played, winners, loosers, draws):
 
 def get_result(team_name, winners, loosers, draws):
     '''
+    This Function will check to see what the result was for 
+    any given team. 
+
+    PARAMETERS: 
+
+    team_name (string): This is the name of the team you want 
+    to find out the result for.
+    winners (list): This is the list of teams that have won 
+    that round.
+    loosers (list): This is the list of teams that have lost 
+    that round.
+    draws (list): This is the list of teams that drew that round.
+
+    RETURNS: 
+
+    result (string) this is whether the given team won lost or 
+    drew. Will return winner, looser, draw respectectively if 
+    the result cant be found will return N/A.
     '''
     if team_name in winners: 
         result = 'winner'
@@ -226,6 +264,25 @@ def get_result(team_name, winners, loosers, draws):
 
 def find_points(round_number, choices, winners, loosers, draws): 
     '''
+    This Function will find the points that each player has gained 
+    for that round given the choices they made. 
+
+    PARAMETERS: 
+
+    round_number (string): This is the round for which you want to 
+    find the points for. 
+    choices (dict): this is the output of the read_choices function 
+    which in turn outputs a dictionary with the key as the players  
+    and the choice as the value 
+    winners (list): This is the list of teams that have won that round.
+    loosers (list): This is the list of teams that have lost that round.
+    draws (list): This is the list of teams that drew that round.
+
+    RETRUNS: 
+
+    points (DataFrame): This table will have 3 columns, name which is 
+    the name of the player, points which is the number of points that 
+    player has gained this round and round which is the round number.
     '''
     points = {}
 
@@ -257,8 +314,29 @@ def find_points(round_number, choices, winners, loosers, draws):
 
     return points
 
+
 def round_worth(value, choice, choices, round_number, double_points): 
     '''
+    The Function will work out the value for the point each player
+    has gained. This will change if the choice was playing in a derby 
+    in a head to head or if it was a draw_weekend. 
+
+    PARAMETERS: 
+
+    value (int): This is the points before we calculate the added rules 
+    1 for a win, 0 for a draw and -1 for a draw. 
+    choice (string): this is the name of the team that the player has picked.
+    choices (dict): this is the output of the read_choices function 
+    which in turn outputs a dictionary with the key as the players  
+    and the choice as the value.
+    round_number (string): This is the round for which you are figuring 
+    out the points worth for. 
+    double_points (bool): 
+
+    RETURNS: 
+
+    value (int) This is the new value for the points gained in this round 
+    for the given choice.
     '''
     derby = played_in_a_derby(choice, round_number) 
 
@@ -277,14 +355,32 @@ def round_worth(value, choice, choices, round_number, double_points):
 
 
 def draws_round_worth(value, choice, round_number, draw_weekend):
-    '''
+    ''' 
+    This Function will work out the points value for the 
+    weeks when there is a draw_weekend. if you played in a 
+    derby you get -1 if it is a draw weekend then you get your
+    score multipled by 3.
+
+    PARAMETERS: 
+
+    value (int): This is the points value already calculated 
+    choice (string): This is the team name for the team the 
+    player chose 
+    round_number (string): This is the current round number 
+    draw_weekend (bool): This is whether or not the round is
+    a draw_weekend or not 
+
+    RETURNS: 
+
+    value (int) This is the new points value for when it is a 
+    draw_weekend.
     '''
     derby = played_in_a_derby(choice, round_number)
 
-    if derby == True: 
+    if derby: 
         value = -1 
 
-    if draw_weekend == True:
+    if draw_weekend:
 
         if value == 0: 
 
@@ -294,12 +390,27 @@ def draws_round_worth(value, choice, round_number, draw_weekend):
 
     return value
 
+# TODO: Figure out a better way to do the derbies. I do not like the hard coded list 
 
 def played_in_a_derby(choice, round_number): 
     '''
-    '''
-    derby = False
+    This Function will figure out if the choice made 
+    was playing in a derby or not. The derbys are a 
+    hardcoded predefined list of fixtures. 
 
+    PARAMETERS: 
+
+    choice (string): This is the choice you wish to check 
+    to see if it played in a derby 
+    round_number (string): This is the round number for which 
+    you want to check and see if the team chosen was playing in 
+    a derby. 
+
+    RETURNS: 
+
+    derby (bool) True if the choice played in a derby False
+    if it did not. 
+    '''
     results = read.read_results(round_number)
 
     derbys = [('Manchester United', 'Manchester City'), ('Liverpool' , 'Everton'),
@@ -317,11 +428,32 @@ def played_in_a_derby(choice, round_number):
         elif choice == i[1] and i[0] == results[results['team'] == choice]['apponent'].values[0]:  
             derby =  True 
 
+        else: 
+            derby = False 
+
     return derby 
 
 
 def played_head_to_head(choice, choices, round_number):
     '''
+    This Function will figure out if the choice made 
+    was playing in a head_to_head or not. 
+
+    PARAMETERS: 
+
+    choice (string): This is the choice you wish to check 
+    to see if it played in a derby.
+    choices (dict): This is the output for the read_choices 
+    function. Which in turn returns a dict whith the names as 
+    the keys and the choices for a given round as the values.
+    round_number (string): This is the round number for which 
+    you want to check and see if the team chosen was playing in 
+    a derby. 
+
+    RETURNS: 
+
+    derby (bool) True if the choice played in a derby False
+    if it did not. 
     '''
     results = read.read_results(round_number)
 
@@ -336,14 +468,29 @@ def played_head_to_head(choice, choices, round_number):
     return head_to_head
 
 
-def run_game_logic(next_round, round_number, testing = False): 
+def run_game_logic(round_number, testing = False): 
     '''
+    This Function is the main command function for this script. 
+    it will run all the required functions in order to read the 
+    choices from sql and output the points gained for the given 
+    round. 
+
+    PARAMETERS: 
+
+    round_number (string): This is the round you want to run the
+    game logic for.
+    testing (bool): if you want to test the script or no.
+
+    RETURNS:
+
+    inputted (bool) True if the points data is inputted successfully 
+    False if the data isn't saved correctly.  
     '''
     choices = read.read_choices(round_number)
 
     raw_data = get_raw_data(round_number)
 
-    played = find_teams_that_played(raw_data)[0]
+    played = find_teams_that_played(raw_data)
 
     winners, loosers, draws = get_team_lists(played)
 
@@ -354,6 +501,3 @@ def run_game_logic(next_round, round_number, testing = False):
     inputted = utils.input_into_sql(points, 'points', 'append')
 
     return inputted 
-
-
-

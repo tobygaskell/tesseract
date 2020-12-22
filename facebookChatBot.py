@@ -2,6 +2,7 @@ from fbchat import Client
 import pandas as pd
 import utils
 from datetime import datetime 
+import ReadFromSql as read
 
 
 def login_to_facebook(username, password): 
@@ -121,7 +122,7 @@ def check_time_validity(msg_obj, round_number):
     '''
     '''
 
-    kick_off = utils.get_earliest_kickoff(round_number)
+    kick_off = read.read_kickoffs(round_number)[0]
     
     time = msg_obj.timestamp / 1000 
 
