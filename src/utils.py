@@ -1,4 +1,4 @@
-import string, configparser, json, requests
+import string, configparser, json, requests, time 
 from sqlalchemy import create_engine 
 import mysql.connector as con 
 import pandas as pd 
@@ -190,6 +190,8 @@ def input_sql(query):
     cursor = connection.cursor()  
 
     cursor.execute(query) 
+
+    time.sleep(2)
 
     connection.commit() 
 

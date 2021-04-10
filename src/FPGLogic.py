@@ -45,16 +45,6 @@ def find_teams_that_played(raw_data):
     # didn't finish the game.
     '''
     played  = [i for i in raw_data if i['status'] == 'Match Finished']
-
-    # not_played = []
-
-    # for i in raw_data: 
-
-    #     if i['status'] != 'Match Finished':
-
-    #         not_played.append(i['homeTeam']['team_name'])
-
-    #         not_played.append(i['awayTeam']['team_name'])
  
     return played
 
@@ -390,7 +380,7 @@ def draws_round_worth(value, choice, round_number, draw_weekend):
 
     return value
 
-# TODO: Figure out a better way to do the derbies. I do not like the hard coded list 
+# TODO: Figure out a better way to do the derbies. I do not like the hard coded list.
 
 def played_in_a_derby(choice, round_number): 
     '''

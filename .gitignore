@@ -6,3 +6,7 @@ config.ini
 feature_ideas.txt
 *.__pycache__
 *.pyc 
+FPG_site/
+playground/
+.vscode
+testing/
